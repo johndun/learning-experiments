@@ -24,7 +24,7 @@
 ## Create visualizations
 
 - [x] Plot function curve with optimization path overlay
-- [ ] Create convergence plots showing parameter and loss evolution
+- [x] Create convergence plots showing parameter and loss evolution
 - [ ] Add animated visualization of gradient descent steps
 - [ ] Include comparison with PyTorch's built-in optimizers
 

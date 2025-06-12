@@ -242,6 +242,61 @@ def test_function_and_gradient():
               f"match = {torch.allclose(analytical_grad, auto_grad)}")
 
 
+def plot_convergence_evolution(
+    param_histories: List[List[float]],
+    function_histories: List[List[float]],
+    labels: List[str],
+    output_file: str = "gradient_descent_convergence.png"
+) -> None:
+    """
+    Plot parameter and loss evolution during gradient descent optimization.
+
+    Args:
+        param_histories: List of parameter histories for different test cases
+        function_histories: List of function value histories for different test cases
+        labels: List of labels for each test case
+        output_file: Filename to save the plot to
+    """
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+
+    colors = ['blue', 'red', 'green', 'purple', 'orange']
+
+    # Plot parameter evolution
+    for i, (param_hist, label) in enumerate(zip(param_histories, labels)):
+        iterations = range(len(param_hist))
+        color = colors[i % len(colors)]
+        ax1.plot(iterations, param_hist, 'o-', color=color, markersize=3,
+                linewidth=2, alpha=0.8, label=label)
+
+    # Add horizontal line for true minimum
+    ax1.axhline(y=3.0, color='gray', linestyle='--', alpha=0.7, label='True minimum (x=3)')
+    ax1.set_xlabel('Iteration')
+    ax1.set_ylabel('Parameter Value (x)')
+    ax1.set_title('Parameter Evolution During Gradient Descent')
+    ax1.grid(True, alpha=0.3)
+    ax1.legend()
+
+    # Plot function value evolution (loss)
+    for i, (func_hist, label) in enumerate(zip(function_histories, labels)):
+        iterations = range(len(func_hist))
+        color = colors[i % len(colors)]
+        ax2.semilogy(iterations, func_hist, 'o-', color=color, markersize=3,
+                    linewidth=2, alpha=0.8, label=label)
+
+    # Add horizontal line for true minimum
+    ax2.axhline(y=1.0, color='gray', linestyle='--', alpha=0.7, label='True minimum (f=1)')
+    ax2.set_xlabel('Iteration')
+    ax2.set_ylabel('Function Value (f(x)) - Log Scale')
+    ax2.set_title('Loss Evolution During Gradient Descent')
+    ax2.grid(True, alpha=0.3)
+    ax2.legend()
+
+    plt.tight_layout()
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Convergence evolution plot saved to: {output_file}")
+
+
 def test_gradient_descent():
     """Test gradient descent convergence for the quadratic function."""
     print("\nTesting gradient descent convergence:")
@@ -254,6 +309,11 @@ def test_gradient_descent():
         {"initial_x": 8.0, "learning_rate": 0.2, "name": "Right start (x=8, lr=0.2)"},
     ]
 
+    # Store histories for convergence plotting
+    param_histories = []
+    function_histories = []
+    labels = []
+
     for i, case in enumerate(test_cases):
         print(f"\nTest Case {i+1}: {case['name']}")
         print("-" * 50)
@@ -263,6 +323,11 @@ def test_gradient_descent():
             learning_rate=case["learning_rate"],
             num_iterations=50
         )
+
+        # Store for convergence plotting
+        param_histories.append(param_hist)
+        function_histories.append(func_hist)
+        labels.append(f"Start x={case['initial_x']}, lr={case['learning_rate']}")
 
         # Verify convergence
         final_x = param_hist[-1]
@@ -274,6 +339,8 @@ def test_gradient_descent():
 
         if i < len(test_cases) - 1:
             print("\n" + "="*50)
+
+    return param_histories, function_histories, labels
 
 
 def main():
@@ -295,8 +362,16 @@ def main():
     # Test function and gradient computation
     test_function_and_gradient()
 
-    # Test gradient descent algorithm
-    test_gradient_descent()
+    # Test gradient descent algorithm and get histories for convergence plotting
+    param_histories, function_histories, labels = test_gradient_descent()
+
+    # Generate convergence evolution plots
+    print("\nGenerating convergence evolution plots...")
+    convergence_output_file = output_dir / "gradient_descent_convergence.png"
+    plot_convergence_evolution(
+        param_histories, function_histories, labels,
+        output_file=str(convergence_output_file)
+    )
 
     # Plot the target function and save to file
     print("\nPlotting target function...")
