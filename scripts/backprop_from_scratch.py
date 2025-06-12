@@ -301,6 +301,199 @@ def vector_scalar_multiply(vector: List[float], scalar: float) -> List[float]:
     return [x * scalar for x in vector]
 
 
+# Neural Network Data Structures
+class Neuron:
+    """Simple neuron implementation with weights and bias."""
+
+    def __init__(self, num_inputs: int, activation_func: str = 'sigmoid'):
+        """
+        Initialize neuron with random weights and bias.
+
+        Args:
+            num_inputs: Number of input connections
+            activation_func: Activation function name ('sigmoid', 'tanh', 'relu')
+        """
+        # Initialize weights with small random values
+        self.weights = [random.uniform(-1.0, 1.0) for _ in range(num_inputs)]
+        self.bias = random.uniform(-1.0, 1.0)
+        self.activation_func = activation_func
+
+        # Storage for forward pass values (needed for backprop)
+        self.last_input = None
+        self.last_weighted_sum = None
+        self.last_output = None
+
+    def forward(self, inputs: List[float]) -> float:
+        """
+        Forward pass through neuron.
+
+        Args:
+            inputs: List of input values
+
+        Returns:
+            Neuron output after activation
+        """
+        if len(inputs) != len(self.weights):
+            raise ValueError(f"Expected {len(self.weights)} inputs, got {len(inputs)}")
+
+        # Store input for backpropagation
+        self.last_input = inputs[:]
+
+        # Compute weighted sum: w1*x1 + w2*x2 + ... + bias
+        weighted_sum = dot_product(self.weights, inputs) + self.bias
+        self.last_weighted_sum = weighted_sum
+
+        # Apply activation function
+        if self.activation_func == 'sigmoid':
+            output = sigmoid(weighted_sum)
+        elif self.activation_func == 'tanh':
+            output = tanh(weighted_sum)
+        elif self.activation_func == 'relu':
+            output = relu(weighted_sum)
+        else:
+            raise ValueError(f"Unknown activation function: {self.activation_func}")
+
+        self.last_output = output
+        return output
+
+    def get_activation_derivative(self) -> float:
+        """Get derivative of activation function at last weighted sum."""
+        if self.last_weighted_sum is None:
+            raise ValueError("Must call forward() before getting derivative")
+
+        if self.activation_func == 'sigmoid':
+            return sigmoid_derivative(self.last_weighted_sum)
+        elif self.activation_func == 'tanh':
+            return tanh_derivative(self.last_weighted_sum)
+        elif self.activation_func == 'relu':
+            return relu_derivative(self.last_weighted_sum)
+        else:
+            raise ValueError(f"Unknown activation function: {self.activation_func}")
+
+
+class Layer:
+    """Simple layer implementation containing multiple neurons."""
+
+    def __init__(self, num_neurons: int, num_inputs: int, activation_func: str = 'sigmoid'):
+        """
+        Initialize layer with specified number of neurons.
+
+        Args:
+            num_neurons: Number of neurons in this layer
+            num_inputs: Number of inputs to each neuron
+            activation_func: Activation function for all neurons in layer
+        """
+        self.neurons = [Neuron(num_inputs, activation_func) for _ in range(num_neurons)]
+        self.num_neurons = num_neurons
+        self.num_inputs = num_inputs
+
+        # Storage for layer outputs (needed for backprop)
+        self.last_outputs = None
+
+    def forward(self, inputs: List[float]) -> List[float]:
+        """
+        Forward pass through entire layer.
+
+        Args:
+            inputs: List of input values
+
+        Returns:
+            List of outputs from all neurons in layer
+        """
+        outputs = []
+        for neuron in self.neurons:
+            output = neuron.forward(inputs)
+            outputs.append(output)
+
+        self.last_outputs = outputs[:]
+        return outputs
+
+    def get_weights_matrix(self) -> Matrix:
+        """Return weights as matrix for layer (each row is one neuron's weights)."""
+        weights_data = []
+        for neuron in self.neurons:
+            weights_data.append(neuron.weights[:])
+        return Matrix(weights_data)
+
+    def get_biases(self) -> List[float]:
+        """Return biases as list for layer."""
+        return [neuron.bias for neuron in self.neurons]
+
+    def update_weights(self, weight_gradients: List[List[float]], learning_rate: float):
+        """
+        Update neuron weights using gradients.
+
+        Args:
+            weight_gradients: 2D list where weight_gradients[i][j] is gradient for neuron i, weight j
+            learning_rate: Learning rate for gradient descent
+        """
+        for i, neuron in enumerate(self.neurons):
+            for j in range(len(neuron.weights)):
+                neuron.weights[j] -= learning_rate * weight_gradients[i][j]
+
+    def update_biases(self, bias_gradients: List[float], learning_rate: float):
+        """
+        Update neuron biases using gradients.
+
+        Args:
+            bias_gradients: List where bias_gradients[i] is gradient for neuron i's bias
+            learning_rate: Learning rate for gradient descent
+        """
+        for i, neuron in enumerate(self.neurons):
+            neuron.bias -= learning_rate * bias_gradients[i]
+
+
+class NeuralNetwork:
+    """Simple feedforward neural network implementation."""
+
+    def __init__(self, layer_sizes: List[int], activation_func: str = 'sigmoid'):
+        """
+        Initialize neural network with specified architecture.
+
+        Args:
+            layer_sizes: List where layer_sizes[i] is number of neurons in layer i
+                        First element is input size, last is output size
+            activation_func: Activation function for hidden layers
+        """
+        if len(layer_sizes) < 2:
+            raise ValueError("Network must have at least input and output layer")
+
+        self.layers = []
+        self.num_layers = len(layer_sizes) - 1  # Number of actual layers (excluding input)
+
+        # Create layers (first layer takes inputs, subsequent layers take previous layer output)
+        for i in range(self.num_layers):
+            num_inputs = layer_sizes[i]
+            num_neurons = layer_sizes[i + 1]
+
+            # Use sigmoid for output layer in binary classification
+            layer_activation = 'sigmoid' if i == self.num_layers - 1 else activation_func
+            layer = Layer(num_neurons, num_inputs, layer_activation)
+            self.layers.append(layer)
+
+    def forward(self, inputs: List[float]) -> List[float]:
+        """
+        Forward pass through entire network.
+
+        Args:
+            inputs: Network input values
+
+        Returns:
+            Network output values
+        """
+        current_inputs = inputs[:]
+
+        # Pass through each layer
+        for layer in self.layers:
+            current_inputs = layer.forward(current_inputs)
+
+        return current_inputs
+
+    def get_layer_outputs(self) -> List[List[float]]:
+        """Get outputs from all layers (for debugging/visualization)."""
+        return [layer.last_outputs[:] for layer in self.layers if layer.last_outputs is not None]
+
+
 def main():
     """Main function to demonstrate backpropagation algorithm."""
     print("Backpropagation from Scratch - Implementation Starting")
@@ -360,7 +553,29 @@ def main():
     print("\nBasic operations validated successfully!")
     print("=" * 50)
 
-    # TODO: Initialize network
+    # Test neural network data structures
+    print("Testing neural network data structures...")
+
+    # Test single neuron
+    neuron = Neuron(2, 'sigmoid')
+    test_input = [0.5, -0.3]
+    output = neuron.forward(test_input)
+    print(f"Neuron forward pass: input={test_input}, output={output:.4f}")
+    print(f"Activation derivative: {neuron.get_activation_derivative():.4f}")
+
+    # Test layer
+    layer = Layer(3, 2, 'sigmoid')  # 3 neurons, 2 inputs each
+    layer_output = layer.forward(test_input)
+    print(f"Layer forward pass: input={test_input}, output={[f'{x:.4f}' for x in layer_output]}")
+
+    # Test full network
+    network = NeuralNetwork([2, 4, 1], 'sigmoid')  # 2 inputs, 4 hidden, 1 output
+    network_output = network.forward(test_input)
+    print(f"Network forward pass: input={test_input}, output={network_output[0]:.4f}")
+
+    print("Neural network data structures validated successfully!")
+    print("=" * 50)
+
     # TODO: Generate XOR dataset
     # TODO: Train network
     # TODO: Visualize results

@@ -14,7 +14,7 @@ Do not write separate test files. Validate functionality with inline print state
 
 ## Core Neural Network Components (All in Single Script)
 
-- [ ] Define simple neuron/layer data structures using basic Python data types
+- [x] Define simple neuron/layer data structures using basic Python data types
 - [ ] Implement forward propagation function that processes input through network layers
 - [ ] Store intermediate activations during forward pass for backpropagation use
 - [ ] Create network initialization function for weights and biases
