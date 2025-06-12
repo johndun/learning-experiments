@@ -53,6 +53,24 @@ def relu(x: float) -> float:
     return max(0.0, x)
 
 
+# Activation Function Derivatives
+def sigmoid_derivative(x: float) -> float:
+    """Derivative of sigmoid function: sigmoid(x) * (1 - sigmoid(x))."""
+    s = sigmoid(x)
+    return s * (1.0 - s)
+
+
+def tanh_derivative(x: float) -> float:
+    """Derivative of tanh function: 1 - tanh^2(x)."""
+    t = tanh(x)
+    return 1.0 - t * t
+
+
+def relu_derivative(x: float) -> float:
+    """Derivative of ReLU function: 1 if x > 0, else 0."""
+    return 1.0 if x > 0.0 else 0.0
+
+
 # Basic Matrix Operations
 class Matrix:
     """Simple matrix implementation for neural network operations."""
@@ -185,6 +203,13 @@ def main():
     print(f"sigmoid(0) = {sigmoid(0.0):.4f}")
     print(f"tanh(1) = {tanh(1.0):.4f}")
     print(f"relu(-1) = {relu(-1.0):.4f}")
+
+    # Test activation function derivatives
+    print(f"\nTesting activation function derivatives:")
+    print(f"sigmoid_derivative(0) = {sigmoid_derivative(0.0):.4f}")
+    print(f"tanh_derivative(1) = {tanh_derivative(1.0):.4f}")
+    print(f"relu_derivative(1) = {relu_derivative(1.0):.4f}")
+    print(f"relu_derivative(-1) = {relu_derivative(-1.0):.4f}")
 
     # Test vector operations
     v1 = [1.0, 2.0, 3.0]
