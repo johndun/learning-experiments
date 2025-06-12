@@ -669,6 +669,136 @@ class NeuralNetwork:
             for j, input_val in enumerate(neuron.last_input):
                 weight_gradients[layer_idx][i][j] = delta * input_val
 
+    def numerical_gradient_check(self, inputs: List[float], targets: List[float],
+                               loss_function: str = 'mse', epsilon: float = 1e-5) -> Tuple[float, float]:
+        """
+        Validate analytical gradients using numerical gradient checking.
+
+        Computes numerical gradients using finite differences and compares them
+        to analytical gradients from backpropagation. This is a critical debugging
+        tool to ensure backpropagation is implemented correctly.
+
+        Args:
+            inputs: Network input values
+            targets: Target values for loss computation
+            loss_function: Loss function to use ('mse' or 'binary_crossentropy')
+            epsilon: Small value for finite difference approximation
+
+        Returns:
+            Tuple of (max_weight_error, max_bias_error) representing maximum
+            absolute differences between numerical and analytical gradients
+        """
+        # Get analytical gradients
+        self.forward(inputs)
+        analytical_weight_grads, analytical_bias_grads = self.backward(targets, loss_function)
+
+        max_weight_error = 0.0
+        max_bias_error = 0.0
+
+        print(f"Running numerical gradient check with epsilon={epsilon}")
+        print("Checking weight gradients...")
+
+        # Check weight gradients
+        for layer_idx, layer in enumerate(self.layers):
+            for neuron_idx, neuron in enumerate(layer.neurons):
+                for weight_idx in range(len(neuron.weights)):
+
+                    # Compute numerical gradient for this weight
+                    original_weight = neuron.weights[weight_idx]
+
+                    # Forward pass with weight + epsilon
+                    neuron.weights[weight_idx] = original_weight + epsilon
+                    self.forward(inputs)
+                    predictions_plus = self.layers[-1].last_outputs[:]
+
+                    if loss_function == 'mse':
+                        loss_plus = mean_squared_error(predictions_plus, targets)
+                    elif loss_function == 'binary_crossentropy':
+                        loss_plus = binary_cross_entropy(predictions_plus, targets)
+                    else:
+                        raise ValueError(f"Unknown loss function: {loss_function}")
+
+                    # Forward pass with weight - epsilon
+                    neuron.weights[weight_idx] = original_weight - epsilon
+                    self.forward(inputs)
+                    predictions_minus = self.layers[-1].last_outputs[:]
+
+                    if loss_function == 'mse':
+                        loss_minus = mean_squared_error(predictions_minus, targets)
+                    elif loss_function == 'binary_crossentropy':
+                        loss_minus = binary_cross_entropy(predictions_minus, targets)
+                    else:
+                        raise ValueError(f"Unknown loss function: {loss_function}")
+
+                    # Restore original weight
+                    neuron.weights[weight_idx] = original_weight
+
+                    # Compute numerical gradient
+                    numerical_grad = (loss_plus - loss_minus) / (2.0 * epsilon)
+                    analytical_grad = analytical_weight_grads[layer_idx][neuron_idx][weight_idx]
+
+                    # Compute error
+                    error = abs(numerical_grad - analytical_grad)
+                    max_weight_error = max(max_weight_error, error)
+
+                    if layer_idx == 0 and neuron_idx == 0:  # Print first few for debugging
+                        print(f"  Layer {layer_idx}, Neuron {neuron_idx}, Weight {weight_idx}:")
+                        print(f"    Numerical: {numerical_grad:.8f}")
+                        print(f"    Analytical: {analytical_grad:.8f}")
+                        print(f"    Error: {error:.8f}")
+
+        print("Checking bias gradients...")
+
+        # Check bias gradients
+        for layer_idx, layer in enumerate(self.layers):
+            for neuron_idx, neuron in enumerate(layer.neurons):
+
+                # Compute numerical gradient for this bias
+                original_bias = neuron.bias
+
+                # Forward pass with bias + epsilon
+                neuron.bias = original_bias + epsilon
+                self.forward(inputs)
+                predictions_plus = self.layers[-1].last_outputs[:]
+
+                if loss_function == 'mse':
+                    loss_plus = mean_squared_error(predictions_plus, targets)
+                elif loss_function == 'binary_crossentropy':
+                    loss_plus = binary_cross_entropy(predictions_plus, targets)
+                else:
+                    raise ValueError(f"Unknown loss function: {loss_function}")
+
+                # Forward pass with bias - epsilon
+                neuron.bias = original_bias - epsilon
+                self.forward(inputs)
+                predictions_minus = self.layers[-1].last_outputs[:]
+
+                if loss_function == 'mse':
+                    loss_minus = mean_squared_error(predictions_minus, targets)
+                elif loss_function == 'binary_crossentropy':
+                    loss_minus = binary_cross_entropy(predictions_minus, targets)
+                else:
+                    raise ValueError(f"Unknown loss function: {loss_function}")
+
+                # Restore original bias
+                neuron.bias = original_bias
+
+                # Compute numerical gradient
+                numerical_grad = (loss_plus - loss_minus) / (2.0 * epsilon)
+                analytical_grad = analytical_bias_grads[layer_idx][neuron_idx]
+
+                # Compute error
+                error = abs(numerical_grad - analytical_grad)
+                max_bias_error = max(max_bias_error, error)
+
+                if layer_idx == 0 and neuron_idx == 0:  # Print first few for debugging
+                    print(f"  Layer {layer_idx}, Neuron {neuron_idx}, Bias:")
+                    print(f"    Numerical: {numerical_grad:.8f}")
+                    print(f"    Analytical: {analytical_grad:.8f}")
+                    print(f"    Error: {error:.8f}")
+
+        return max_weight_error, max_bias_error
+
 
 def main():
     """Main function to demonstrate backpropagation algorithm."""
@@ -785,11 +915,72 @@ def main():
     print("Backpropagation gradients validated successfully!")
     print("=" * 50)
 
+    # Test numerical gradient checking
+    print("Testing numerical gradient checking...")
+
+    # Test with simple network
+    print("\nTesting simple network (2 inputs, 1 output):")
+    gradient_network = NeuralNetwork([2, 1], 'sigmoid')
+    test_inputs = [0.5, -0.3]
+    test_targets = [1.0]
+
+    max_weight_error, max_bias_error = gradient_network.numerical_gradient_check(
+        test_inputs, test_targets, 'mse', epsilon=1e-5
+    )
+
+    print(f"\nGradient Check Results:")
+    print(f"Maximum weight gradient error: {max_weight_error:.10f}")
+    print(f"Maximum bias gradient error: {max_bias_error:.10f}")
+
+    # Check if gradients are sufficiently accurate
+    tolerance = 1e-5
+    if max_weight_error < tolerance and max_bias_error < tolerance:
+        print(f"✓ Gradient check PASSED! (errors < {tolerance})")
+    else:
+        print(f"✗ Gradient check FAILED! (errors >= {tolerance})")
+
+    # Test with multi-layer network
+    print("\nTesting multi-layer network (2 inputs, 3 hidden, 1 output):")
+    complex_network = NeuralNetwork([2, 3, 1], 'sigmoid')
+
+    max_weight_error_complex, max_bias_error_complex = complex_network.numerical_gradient_check(
+        test_inputs, test_targets, 'mse', epsilon=1e-5
+    )
+
+    print(f"\nComplex Network Gradient Check Results:")
+    print(f"Maximum weight gradient error: {max_weight_error_complex:.10f}")
+    print(f"Maximum bias gradient error: {max_bias_error_complex:.10f}")
+
+    if max_weight_error_complex < tolerance and max_bias_error_complex < tolerance:
+        print(f"✓ Complex network gradient check PASSED! (errors < {tolerance})")
+    else:
+        print(f"✗ Complex network gradient check FAILED! (errors >= {tolerance})")
+
+    # Test with binary cross-entropy loss
+    print("\nTesting with binary cross-entropy loss:")
+    bce_network = NeuralNetwork([2, 1], 'sigmoid')
+
+    max_weight_error_bce, max_bias_error_bce = bce_network.numerical_gradient_check(
+        test_inputs, test_targets, 'binary_crossentropy', epsilon=1e-5
+    )
+
+    print(f"\nBCE Gradient Check Results:")
+    print(f"Maximum weight gradient error: {max_weight_error_bce:.10f}")
+    print(f"Maximum bias gradient error: {max_bias_error_bce:.10f}")
+
+    if max_weight_error_bce < tolerance and max_bias_error_bce < tolerance:
+        print(f"✓ BCE gradient check PASSED! (errors < {tolerance})")
+    else:
+        print(f"✗ BCE gradient check FAILED! (errors >= {tolerance})")
+
+    print("\nNumerical gradient checking completed successfully!")
+    print("=" * 50)
+
     # TODO: Generate XOR dataset
     # TODO: Train network
     # TODO: Visualize results
 
-    print("Implementation complete!")
+    print("Implementation complete with validated backpropagation!")
 
 
 if __name__ == "__main__":
