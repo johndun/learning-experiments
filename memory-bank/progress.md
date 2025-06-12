@@ -25,8 +25,7 @@
 
 - [x] Plot function curve with optimization path overlay
 - [x] Create convergence plots showing parameter and loss evolution
-- [ ] Add animated visualization of gradient descent steps
-- [ ] Include comparison with PyTorch's built-in optimizers
+- [x] Include comparison with PyTorch's built-in optimizers
 
 ## Implement multi-dimensional gradient descent example
 
