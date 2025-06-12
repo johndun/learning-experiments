@@ -413,8 +413,21 @@ def compare_optimizers(
     )
     results["PyTorch SGD"] = (param_hist, func_hist)
 
+    # Test PyTorch SGD with momentum
+    print("\n3. PyTorch SGD with Momentum")
+    print("-" * 29)
+    param_hist, func_hist = pytorch_optimizer_test(
+        optimizer_class=optim.SGD,
+        optimizer_name="SGD with Momentum",
+        initial_x=initial_x,
+        learning_rate=learning_rate,
+        num_iterations=num_iterations,
+        momentum=0.9
+    )
+    results["PyTorch SGD + Momentum"] = (param_hist, func_hist)
+
     # Test PyTorch Adam
-    print("\n3. PyTorch Adam")
+    print("\n4. PyTorch Adam")
     print("-" * 16)
     param_hist, func_hist = pytorch_optimizer_test(
         optimizer_class=optim.Adam,
@@ -426,7 +439,7 @@ def compare_optimizers(
     results["PyTorch Adam"] = (param_hist, func_hist)
 
     # Test PyTorch RMSprop
-    print("\n4. PyTorch RMSprop")
+    print("\n5. PyTorch RMSprop")
     print("-" * 19)
     param_hist, func_hist = pytorch_optimizer_test(
         optimizer_class=optim.RMSprop,
