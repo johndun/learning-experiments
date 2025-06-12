@@ -201,86 +201,6 @@ def bce_derivative(predictions: list[float], targets: list[float]) -> list[float
     return gradients
 
 
-# Basic Matrix Operations
-class Matrix:
-    """Simple matrix implementation for neural network operations."""
-
-    def __init__(self, data: list[list[float]]):
-        """Initialize matrix with 2D list of floats."""
-        self.data = data
-        self.rows = len(data)
-        self.cols = len(data[0]) if data else 0
-
-    def __getitem__(self, key: tuple[int, int]) -> float:
-        """Get element at row, col."""
-        row, col = key
-        return self.data[row][col]
-
-    def __setitem__(self, key: tuple[int, int], value: float):
-        """Set element at row, col."""
-        row, col = key
-        self.data[row][col] = value
-
-    def transpose(self) -> "Matrix":
-        """Return transpose of matrix."""
-        transposed = [[self.data[j][i] for j in range(self.rows)] for i in range(self.cols)]
-        return Matrix(transposed)
-
-    def multiply(self, other: "Matrix") -> "Matrix":
-        """Matrix multiplication."""
-        if self.cols != other.rows:
-            raise ValueError(
-                f"Cannot multiply {self.rows}x{self.cols} and {other.rows}x{other.cols}"
-            )
-
-        result = [[0.0 for _ in range(other.cols)] for _ in range(self.rows)]
-
-        for i in range(self.rows):
-            for j in range(other.cols):
-                for k in range(self.cols):
-                    result[i][j] += self.data[i][k] * other.data[k][j]
-
-        return Matrix(result)
-
-    def add(self, other: "Matrix") -> "Matrix":
-        """Element-wise addition."""
-        if self.rows != other.rows or self.cols != other.cols:
-            raise ValueError("Matrices must have same dimensions for addition")
-
-        result = [
-            [self.data[i][j] + other.data[i][j] for j in range(self.cols)] for i in range(self.rows)
-        ]
-        return Matrix(result)
-
-    def subtract(self, other: "Matrix") -> "Matrix":
-        """Element-wise subtraction."""
-        if self.rows != other.rows or self.cols != other.cols:
-            raise ValueError("Matrices must have same dimensions for subtraction")
-
-        result = [
-            [self.data[i][j] - other.data[i][j] for j in range(self.cols)] for i in range(self.rows)
-        ]
-        return Matrix(result)
-
-    def scalar_multiply(self, scalar: float) -> "Matrix":
-        """Multiply all elements by scalar."""
-        result = [[self.data[i][j] * scalar for j in range(self.cols)] for i in range(self.rows)]
-        return Matrix(result)
-
-    def apply_function(self, func: Callable[[float], float]) -> "Matrix":
-        """Apply function to all elements."""
-        result = [[func(self.data[i][j]) for j in range(self.cols)] for i in range(self.rows)]
-        return Matrix(result)
-
-    def to_list(self) -> list[list[float]]:
-        """Convert to list of lists."""
-        return [row[:] for row in self.data]
-
-    def __str__(self) -> str:
-        """String representation of matrix."""
-        return "\n".join(["\t".join([f"{val:.4f}" for val in row]) for row in self.data])
-
-
 # Vector Operations
 def dot_product(a: list[float], b: list[float]) -> float:
     """Compute dot product of two vectors."""
@@ -415,16 +335,6 @@ class Layer:
         self.last_outputs = outputs[:]
         return outputs
 
-    def get_weights_matrix(self) -> Matrix:
-        """Return weights as matrix for layer (each row is one neuron's weights)."""
-        weights_data = []
-        for neuron in self.neurons:
-            weights_data.append(neuron.weights[:])
-        return Matrix(weights_data)
-
-    def get_biases(self) -> list[float]:
-        """Return biases as list for layer."""
-        return [neuron.bias for neuron in self.neurons]
 
     def update_weights(self, weight_gradients: list[list[float]], learning_rate: float):
         """
@@ -496,9 +406,6 @@ class NeuralNetwork:
 
         return current_inputs
 
-    def get_layer_outputs(self) -> list[list[float]]:
-        """Get outputs from all layers (for debugging/visualization)."""
-        return [layer.last_outputs[:] for layer in self.layers if layer.last_outputs is not None]
 
     def backward(
         self, targets: list[float], loss_function: str = "mse"
@@ -1100,23 +1007,6 @@ def main():
     """Main function to demonstrate backpropagation algorithm."""
     print("Backpropagation from Scratch - Implementation Starting")
     print("=" * 50)
-
-    # Test basic matrix operations
-    print("Testing basic matrix operations...")
-
-    # Test matrix creation and basic operations
-    m1 = Matrix([[1.0, 2.0], [3.0, 4.0]])
-    m2 = Matrix([[5.0, 6.0], [7.0, 8.0]])
-
-    print("Matrix 1:")
-    print(m1)
-    print("\nMatrix 2:")
-    print(m2)
-
-    # Test matrix multiplication
-    result = m1.multiply(m2)
-    print("\nMatrix multiplication result:")
-    print(result)
 
     # Test activation functions
     print("\nTesting activation functions:")
