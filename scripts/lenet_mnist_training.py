@@ -493,10 +493,65 @@ def plot_feature_maps(model: nn.Module, test_loader: DataLoader, device: torch.d
     plt.close()
 
 
+def train_model_version(model: nn.Module, train_loader: DataLoader, test_loader: DataLoader,
+                       optimizer: optim.Optimizer, criterion: nn.Module, device: torch.device,
+                       config: dict, version_name: str) -> Tuple[List[float], List[float], List[float], List[float], float]:
+    """
+    Train a model version and return training metrics.
+
+    Args:
+        model: Neural network model
+        train_loader: Training data loader
+        test_loader: Test data loader
+        optimizer: Optimizer for parameter updates
+        criterion: Loss function
+        device: Device to run training on
+        config: Training configuration dictionary
+        version_name: Name for this version (e.g., "Standard" or "Compiled")
+
+    Returns:
+        Tuple of (train_losses, train_accuracies, test_losses, test_accuracies, total_time)
+    """
+    print(f"\n" + "=" * 60)
+    print(f"TRAINING {version_name.upper()} VERSION")
+    print("=" * 60)
+
+    train_losses = []
+    train_accuracies = []
+    test_losses = []
+    test_accuracies = []
+
+    training_start_time = time.time()
+
+    for epoch in range(config['epochs']):
+        epoch_start_time = time.time()
+
+        # Train for one epoch
+        train_loss, train_acc = train_epoch(model, train_loader, optimizer, criterion, device, epoch)
+
+        # Evaluate on test set
+        print("Evaluating on test set...")
+        test_loss, test_acc = test_model(model, test_loader, criterion, device)
+
+        # Store metrics
+        train_losses.append(train_loss)
+        train_accuracies.append(train_acc)
+        test_losses.append(test_loss)
+        test_accuracies.append(test_acc)
+
+        epoch_time = time.time() - epoch_start_time
+        print(f"Epoch {epoch + 1} completed in {epoch_time:.2f} seconds")
+        print("=" * 50)
+
+    total_training_time = time.time() - training_start_time
+
+    return train_losses, train_accuracies, test_losses, test_accuracies, total_training_time
+
+
 def main():
-    """Main function to demonstrate LeNet-5 training on MNIST."""
-    print("LeNet-5 MNIST Training - CPU Optimized")
-    print("=" * 50)
+    """Main function to demonstrate LeNet-5 training on MNIST with torch.compile speedup comparison."""
+    print("LeNet-5 MNIST Training - torch.compile Speedup Demo")
+    print("=" * 55)
 
     # Check device availability
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -517,6 +572,7 @@ def main():
         'epochs': 5,                # Few epochs for rapid feedback
         'use_subset': True,         # Use subset for ultra-fast training
         'subset_ratio': 0.1,        # 10% of data for rapid iteration
+        'compare_compile': True,    # Enable torch.compile comparison
     }
 
     print("\nTraining Configuration:")
@@ -559,44 +615,135 @@ def main():
     print(f"\nOptimizer: SGD(lr={config['learning_rate']}, momentum={config['momentum']})")
     print(f"Loss function: {criterion}")
 
-    # Training loop
-    print("\n" + "=" * 60)
-    print("STARTING TRAINING")
-    print("=" * 60)
+    # torch.compile comparison training
+    if config['compare_compile']:
+        print("\n" + "=" * 70)
+        print("TORCH.COMPILE SPEEDUP COMPARISON")
+        print("=" * 70)
+        print("Training identical models with and without torch.compile optimization")
+        print("This comparison will show potential performance improvements from compilation.")
+        print()
 
-    train_losses = []
-    train_accuracies = []
-    test_losses = []
-    test_accuracies = []
+        # ===== STANDARD MODEL TRAINING =====
+        # Reset model and optimizer for fair comparison
+        torch.manual_seed(42)  # Reset seed for reproducible weights
+        model_standard = LeNet5().to(device)
+        optimizer_standard = optim.SGD(model_standard.parameters(),
+                                     lr=config['learning_rate'],
+                                     momentum=config['momentum'])
 
-    training_start_time = time.time()
+        # Train standard model
+        (train_losses_std, train_accuracies_std,
+         test_losses_std, test_accuracies_std,
+         training_time_std) = train_model_version(
+            model_standard, train_loader, test_loader,
+            optimizer_standard, criterion, device, config, "Standard"
+        )
 
-    for epoch in range(config['epochs']):
-        epoch_start_time = time.time()
+        # ===== COMPILED MODEL TRAINING =====
+        # Reset model and optimizer for fair comparison
+        torch.manual_seed(42)  # Reset seed for identical weights
+        model_compiled = LeNet5().to(device)
 
-        # Train for one epoch
-        train_loss, train_acc = train_epoch(model, train_loader, optimizer, criterion, device, epoch)
+        # Apply torch.compile optimization
+        print(f"\nApplying torch.compile optimization...")
+        model_compiled = torch.compile(model_compiled)
+        print("✅ Model compiled successfully!")
 
-        # Evaluate on test set
-        print("Evaluating on test set...")
-        test_loss, test_acc = test_model(model, test_loader, criterion, device)
+        optimizer_compiled = optim.SGD(model_compiled.parameters(),
+                                     lr=config['learning_rate'],
+                                     momentum=config['momentum'])
 
-        # Store metrics
-        train_losses.append(train_loss)
-        train_accuracies.append(train_acc)
-        test_losses.append(test_loss)
-        test_accuracies.append(test_acc)
+        # Train compiled model
+        (train_losses_comp, train_accuracies_comp,
+         test_losses_comp, test_accuracies_comp,
+         training_time_comp) = train_model_version(
+            model_compiled, train_loader, test_loader,
+            optimizer_compiled, criterion, device, config, "Compiled"
+        )
 
-        epoch_time = time.time() - epoch_start_time
-        print(f"Epoch {epoch + 1} completed in {epoch_time:.2f} seconds")
-        print("=" * 50)
+        # ===== PERFORMANCE COMPARISON =====
+        print("\n" + "=" * 70)
+        print("PERFORMANCE COMPARISON RESULTS")
+        print("=" * 70)
 
-    total_training_time = time.time() - training_start_time
+        # Calculate speedup metrics
+        speedup_ratio = training_time_std / training_time_comp
+        time_saved = training_time_std - training_time_comp
+        speedup_percent = ((training_time_std - training_time_comp) / training_time_std) * 100
+
+        # Training time comparison
+        print(f"\n📊 TRAINING TIME COMPARISON:")
+        print(f"{'Standard Model:':<20} {training_time_std:>8.2f} seconds")
+        print(f"{'Compiled Model:':<20} {training_time_comp:>8.2f} seconds")
+        print(f"{'Time Saved:':<20} {time_saved:>8.2f} seconds")
+        print(f"{'Speedup Ratio:':<20} {speedup_ratio:>8.2f}x")
+        print(f"{'Speedup Percent:':<20} {speedup_percent:>7.1f}%")
+
+        # Accuracy comparison
+        print(f"\n🎯 ACCURACY COMPARISON:")
+        print(f"{'Standard Final:':<20} {test_accuracies_std[-1]:>7.2f}%")
+        print(f"{'Compiled Final:':<20} {test_accuracies_comp[-1]:>7.2f}%")
+        accuracy_diff = test_accuracies_comp[-1] - test_accuracies_std[-1]
+        print(f"{'Accuracy Diff:':<20} {accuracy_diff:>+7.2f}%")
+
+        # Performance analysis
+        print(f"\n⚡ SPEEDUP ANALYSIS:")
+        if speedup_percent > 10:
+            print(f"🚀 EXCELLENT! torch.compile provided {speedup_percent:.1f}% speedup")
+            print("   Compilation optimization significantly improved training performance!")
+        elif speedup_percent > 5:
+            print(f"📈 GOOD! torch.compile provided {speedup_percent:.1f}% speedup")
+            print("   Compilation optimization provided measurable performance gain.")
+        elif speedup_percent > 0:
+            print(f"📊 MODEST! torch.compile provided {speedup_percent:.1f}% speedup")
+            print("   Compilation optimization provided small performance gain.")
+        else:
+            print(f"📉 SLOWER! torch.compile provided {speedup_percent:.1f}% change")
+            print("   Compilation overhead outweighed performance benefits.")
+            print("   This is common for small models, CPU training, or short training runs.")
+
+        # Compilation overhead analysis
+        if training_time_comp > training_time_std:
+            print(f"\n📋 COMPILATION OVERHEAD ANALYSIS:")
+            print("   torch.compile introduces overhead during the first epoch(s) for graph compilation.")
+            print("   Benefits typically appear in longer training runs or more complex models.")
+            print("   Consider torch.compile for: GPU training, large models, or many epochs.")
+
+        # Recommendations
+        print(f"\n💡 RECOMMENDATIONS:")
+        if speedup_percent > 5:
+            print("✅ torch.compile is beneficial for this workload - consider using it in production")
+        else:
+            print("⚠️  torch.compile benefits are minimal - evaluate based on specific use case")
+
+        print("📝 Note: Speedup can vary based on model complexity, hardware, and PyTorch version")
+
+        # Store results for visualization (use compiled model results)
+        train_losses = train_losses_comp
+        train_accuracies = train_accuracies_comp
+        test_losses = test_losses_comp
+        test_accuracies = test_accuracies_comp
+        total_training_time = training_time_comp
+        model = model_compiled
+
+    else:
+        # Standard training without comparison
+        print("\n" + "=" * 60)
+        print("STARTING STANDARD TRAINING")
+        print("=" * 60)
+
+        (train_losses, train_accuracies,
+         test_losses, test_accuracies,
+         total_training_time) = train_model_version(
+            model, train_loader, test_loader,
+            optimizer, criterion, device, config, "Standard"
+        )
 
     print("\n" + "=" * 60)
     print("TRAINING COMPLETED")
     print("=" * 60)
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Final training time: {total_training_time:.2f} seconds")
     print(f"Average time per epoch: {total_training_time/config['epochs']:.2f} seconds")
 
     # Final results
