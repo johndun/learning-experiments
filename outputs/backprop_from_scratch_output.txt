@@ -1,0 +1,326 @@
+Backpropagation from Scratch - Implementation Starting
+==================================================
+
+Testing activation functions:
+sigmoid(0) = 0.5000
+tanh(1) = 0.7616
+relu(-1) = 0.0000
+
+Testing activation function derivatives:
+sigmoid_derivative(0) = 0.2500
+tanh_derivative(1) = 0.4200
+relu_derivative(1) = 1.0000
+relu_derivative(-1) = 0.0000
+
+Vector dot product: 32.0
+
+Testing loss functions:
+MSE loss: 0.0375
+MSE gradients: ['-0.1000', '0.1500', '-0.0500', '0.0500']
+BCE loss: 0.1976
+BCE gradients: ['-0.3125', '0.3571', '-0.2778', '0.2778']
+
+Basic operations validated successfully!
+==================================================
+Testing neural network data structures...
+Neuron forward pass: input=[0.5, -0.3], output=0.4092
+Activation derivative: 0.2418
+Layer forward pass: input=[0.5, -0.3], output=['0.6793', '0.6314', '0.1654']
+Network forward pass: input=[0.5, -0.3], output=0.6686
+Neural network data structures validated successfully!
+==================================================
+Testing backpropagation gradients...
+Forward pass: input=[0.5, -0.3], prediction=0.4828, target=1.0
+Computed gradients successfully!
+Weight gradients shape: 1 layers
+Layer 0 weight gradients: 1 neurons, 2 weights each
+First neuron weight gradients: ['-0.1291', '0.0775']
+First neuron bias gradient: -0.2583
+
+Testing multi-layer network gradients...
+Multi-layer forward pass: prediction=0.2496
+Multi-layer gradients computed for 2 layers
+Backpropagation gradients validated successfully!
+==================================================
+Testing numerical gradient checking...
+
+Testing simple network (2 inputs, 1 output):
+Running numerical gradient check with epsilon=1e-05
+Checking weight gradients...
+  Layer 0, Neuron 0, Weight 0:
+    Numerical: -0.14745189
+    Analytical: -0.14745189
+    Error: 0.00000000
+  Layer 0, Neuron 0, Weight 1:
+    Numerical: 0.08847113
+    Analytical: 0.08847113
+    Error: 0.00000000
+Checking bias gradients...
+  Layer 0, Neuron 0, Bias:
+    Numerical: -0.29490377
+    Analytical: -0.29490377
+    Error: 0.00000000
+
+Gradient Check Results:
+Maximum weight gradient error: 0.0000000000
+Maximum bias gradient error: 0.0000000000
+✓ Gradient check PASSED! (errors < 1e-05)
+
+Testing multi-layer network (2 inputs, 3 hidden, 1 output):
+Running numerical gradient check with epsilon=1e-05
+Checking weight gradients...
+  Layer 0, Neuron 0, Weight 0:
+    Numerical: -0.00664262
+    Analytical: -0.00664262
+    Error: 0.00000000
+  Layer 0, Neuron 0, Weight 1:
+    Numerical: 0.00398557
+    Analytical: 0.00398557
+    Error: 0.00000000
+Checking bias gradients...
+  Layer 0, Neuron 0, Bias:
+    Numerical: -0.01328523
+    Analytical: -0.01328523
+    Error: 0.00000000
+
+Complex Network Gradient Check Results:
+Maximum weight gradient error: 0.0000000000
+Maximum bias gradient error: 0.0000000000
+✓ Complex network gradient check PASSED! (errors < 1e-05)
+
+Testing with binary cross-entropy loss:
+Running numerical gradient check with epsilon=1e-05
+Checking weight gradients...
+  Layer 0, Neuron 0, Weight 0:
+    Numerical: -0.24391531
+    Analytical: -0.24391531
+    Error: 0.00000000
+  Layer 0, Neuron 0, Weight 1:
+    Numerical: 0.14634918
+    Analytical: 0.14634918
+    Error: 0.00000000
+Checking bias gradients...
+  Layer 0, Neuron 0, Bias:
+    Numerical: -0.48783061
+    Analytical: -0.48783061
+    Error: 0.00000000
+
+BCE Gradient Check Results:
+Maximum weight gradient error: 0.0000000000
+Maximum bias gradient error: 0.0000000000
+✓ BCE gradient check PASSED! (errors < 1e-05)
+
+Numerical gradient checking completed successfully!
+==================================================
+Generating XOR dataset for binary classification...
+XOR Dataset Generated:
+Input1  Input2  Target
+--------------------
+ 0.0     0.0     0.0
+ 0.0     1.0     1.0
+ 1.0     0.0     1.0
+ 1.0     1.0     0.0
+
+Testing untrained network on XOR dataset:
+Untrained Network Predictions:
+Input1  Input2  Prediction  Target  Error
+----------------------------------------
+ 0.0     0.0      0.3230   0.0  0.3230
+ 0.0     1.0      0.2919   1.0  0.7081
+ 1.0     0.0      0.3779   1.0  0.6221
+ 1.0     1.0      0.3425   0.0  0.3425
+Average prediction error (untrained): 0.4989
+
+XOR Problem Analysis:
+The XOR problem is a classic example of a non-linearly separable dataset.
+A single perceptron cannot solve XOR, but a multi-layer network can.
+This demonstrates the power of hidden layers in neural networks.
+
+Linear separability check:
+For linear separability, we need to find weights w1, w2, bias b such that:
+  w1*x1 + w2*x2 + b > 0 for positive class
+  w1*x1 + w2*x2 + b < 0 for negative class
+
+XOR truth table analysis:
+  (0,0) -> 0: Need w1*0 + w2*0 + b < 0, so b < 0
+  (0,1) -> 1: Need w1*0 + w2*1 + b > 0, so w2 + b > 0
+  (1,0) -> 1: Need w1*1 + w2*0 + b > 0, so w1 + b > 0
+  (1,1) -> 0: Need w1*1 + w2*1 + b < 0, so w1 + w2 + b < 0
+
+From constraints 2 and 3: w1 > -b and w2 > -b
+From constraint 4: w1 + w2 < -b
+This gives us: w1 + w2 < -b < w1 and w1 + w2 < -b < w2
+This is impossible since w1 + w2 cannot be less than both w1 and w2!
+Therefore, XOR is NOT linearly separable.
+
+XOR dataset generation completed successfully!
+==================================================
+Demonstrating complete training loop with epoch management...
+
+Initializing network for XOR training:
+Architecture: 2 inputs -> 4 hidden neurons -> 1 output
+Training parameters:
+  Epochs: 1000
+  Learning rate: 5.0
+  Loss function: mse
+  Dataset size: 4 examples
+
+Starting training...
+Progress will be reported every 100 epochs
+--------------------------------------------------
+Epoch 10/1000, Average Loss: 0.365824
+Epoch 20/1000, Average Loss: 0.240797
+Epoch 30/1000, Average Loss: 0.230389
+Epoch 40/1000, Average Loss: 0.226975
+Epoch 50/1000, Average Loss: 0.224345
+Epoch 60/1000, Average Loss: 0.220485
+Epoch 70/1000, Average Loss: 0.219409
+Epoch 80/1000, Average Loss: 0.193814
+Epoch 90/1000, Average Loss: 0.009615
+Epoch 100/1000, Average Loss: 0.005239
+Epoch 110/1000, Average Loss: 0.003693
+Epoch 120/1000, Average Loss: 0.002851
+Epoch 130/1000, Average Loss: 0.002318
+Epoch 140/1000, Average Loss: 0.001950
+Epoch 150/1000, Average Loss: 0.001681
+Epoch 160/1000, Average Loss: 0.001476
+Epoch 170/1000, Average Loss: 0.001314
+Epoch 180/1000, Average Loss: 0.001184
+Epoch 190/1000, Average Loss: 0.001076
+Epoch 200/1000, Average Loss: 0.000986
+Epoch 210/1000, Average Loss: 0.000909
+Epoch 220/1000, Average Loss: 0.000844
+Epoch 230/1000, Average Loss: 0.000787
+Epoch 240/1000, Average Loss: 0.000737
+Epoch 250/1000, Average Loss: 0.000692
+Epoch 260/1000, Average Loss: 0.000653
+Epoch 270/1000, Average Loss: 0.000618
+Epoch 280/1000, Average Loss: 0.000586
+Epoch 290/1000, Average Loss: 0.000557
+Epoch 300/1000, Average Loss: 0.000531
+Epoch 310/1000, Average Loss: 0.000508
+Epoch 320/1000, Average Loss: 0.000486
+Epoch 330/1000, Average Loss: 0.000466
+Epoch 340/1000, Average Loss: 0.000447
+Epoch 350/1000, Average Loss: 0.000430
+Epoch 360/1000, Average Loss: 0.000414
+Epoch 370/1000, Average Loss: 0.000399
+Epoch 380/1000, Average Loss: 0.000386
+Epoch 390/1000, Average Loss: 0.000373
+Epoch 400/1000, Average Loss: 0.000361
+Epoch 410/1000, Average Loss: 0.000349
+Epoch 420/1000, Average Loss: 0.000339
+Epoch 430/1000, Average Loss: 0.000329
+Epoch 440/1000, Average Loss: 0.000319
+Epoch 450/1000, Average Loss: 0.000310
+Epoch 460/1000, Average Loss: 0.000302
+Epoch 470/1000, Average Loss: 0.000294
+Epoch 480/1000, Average Loss: 0.000286
+Epoch 490/1000, Average Loss: 0.000279
+Epoch 500/1000, Average Loss: 0.000272
+Epoch 510/1000, Average Loss: 0.000265
+Epoch 520/1000, Average Loss: 0.000259
+Epoch 530/1000, Average Loss: 0.000253
+Epoch 540/1000, Average Loss: 0.000248
+Epoch 550/1000, Average Loss: 0.000242
+Epoch 560/1000, Average Loss: 0.000237
+Epoch 570/1000, Average Loss: 0.000232
+Epoch 580/1000, Average Loss: 0.000227
+Epoch 590/1000, Average Loss: 0.000222
+Epoch 600/1000, Average Loss: 0.000218
+Epoch 610/1000, Average Loss: 0.000214
+Epoch 620/1000, Average Loss: 0.000210
+Epoch 630/1000, Average Loss: 0.000206
+Epoch 640/1000, Average Loss: 0.000202
+Epoch 650/1000, Average Loss: 0.000198
+Epoch 660/1000, Average Loss: 0.000195
+Epoch 670/1000, Average Loss: 0.000191
+Epoch 680/1000, Average Loss: 0.000188
+Epoch 690/1000, Average Loss: 0.000185
+Epoch 700/1000, Average Loss: 0.000181
+Epoch 710/1000, Average Loss: 0.000178
+Epoch 720/1000, Average Loss: 0.000176
+Epoch 730/1000, Average Loss: 0.000173
+Epoch 740/1000, Average Loss: 0.000170
+Epoch 750/1000, Average Loss: 0.000167
+Epoch 760/1000, Average Loss: 0.000165
+Epoch 770/1000, Average Loss: 0.000162
+Epoch 780/1000, Average Loss: 0.000160
+Epoch 790/1000, Average Loss: 0.000158
+Epoch 800/1000, Average Loss: 0.000155
+Epoch 810/1000, Average Loss: 0.000153
+Epoch 820/1000, Average Loss: 0.000151
+Epoch 830/1000, Average Loss: 0.000149
+Epoch 840/1000, Average Loss: 0.000147
+Epoch 850/1000, Average Loss: 0.000145
+Epoch 860/1000, Average Loss: 0.000143
+Epoch 870/1000, Average Loss: 0.000141
+Epoch 880/1000, Average Loss: 0.000139
+Epoch 890/1000, Average Loss: 0.000137
+Epoch 900/1000, Average Loss: 0.000136
+Epoch 910/1000, Average Loss: 0.000134
+Epoch 920/1000, Average Loss: 0.000132
+Epoch 930/1000, Average Loss: 0.000131
+Epoch 940/1000, Average Loss: 0.000129
+Epoch 950/1000, Average Loss: 0.000128
+Epoch 960/1000, Average Loss: 0.000126
+Epoch 970/1000, Average Loss: 0.000125
+Epoch 980/1000, Average Loss: 0.000123
+Epoch 990/1000, Average Loss: 0.000122
+Epoch 1000/1000, Average Loss: 0.000120
+--------------------------------------------------
+Training completed!
+
+Testing trained network on XOR dataset:
+Input1  Input2  Prediction  Target  Error
+----------------------------------------
+ 0.0     0.0      0.0083   0.0  0.0083
+ 0.0     1.0      0.9898   1.0  0.0102
+ 1.0     0.0      0.9896   1.0  0.0104
+ 1.0     1.0      0.0141   0.0  0.0141
+Average prediction error (trained): 0.010751
+Improvement from untrained: 0.488175
+
+Training Analysis:
+Initial loss: 0.476388
+Final loss: 0.000120
+Loss reduction: 0.476268
+Convergence achieved: Yes
+
+Binary Classification Results (tolerance: 0.1):
+Input: (0.0, 0.0) -> Raw: 0.0083, Class: 0.0, Target: 0.0, ✓
+Input: (0.0, 1.0) -> Raw: 0.9898, Class: 1.0, Target: 1.0, ✓
+Input: (1.0, 0.0) -> Raw: 0.9896, Class: 1.0, Target: 1.0, ✓
+Input: (1.0, 1.0) -> Raw: 0.0141, Class: 0.0, Target: 0.0, ✓
+
+Classification Accuracy: 100.0% (4/4)
+🎉 SUCCESS! Network successfully learned the XOR function!
+
+==================================================
+GENERATING TRAINING LOSS CONVERGENCE PLOT
+==================================================
+Training loss plot saved to: outputs/backprop_training_loss.png
+✅ Training loss convergence plot generated successfully!
+==================================================
+
+==================================================
+GENERATING DECISION BOUNDARY VISUALIZATION
+==================================================
+Decision boundary plot saved to: outputs/backprop_decision_boundary.png
+✅ Decision boundary visualization generated successfully!
+==================================================
+
+==================================================
+TRAINING LOOP DEMONSTRATION COMPLETE
+==================================================
+✅ Implemented complete training loop with:
+   • Epoch management and progress tracking
+   • Loss computation and monitoring
+   • Parameter updates via gradient descent
+   • Training progress reporting
+   • Performance evaluation on test data
+   • Convergence analysis
+   • Binary classification metrics
+   • Training loss visualization
+==================================================
+Implementation complete with validated backpropagation!

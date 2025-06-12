@@ -1,0 +1,189 @@
+Torch-Based Gradient Descent Demo
+========================================
+PyTorch version: 2.7.1
+Script initialized successfully!
+
+Target Function:
+f(x) = (x - 3)² + 1
+Minimum at x = 3, f(3) = 1
+Gradient: df/dx = 2(x - 3)
+
+Testing function and gradient computation:
+----------------------------------------
+x =  0.0: f(x) = 10.000, analytical grad = -6.000, auto grad = -6.000, match = True
+x =  1.0: f(x) =  5.000, analytical grad = -4.000, auto grad = -4.000, match = True
+x =  3.0: f(x) =  1.000, analytical grad =  0.000, auto grad =  0.000, match = True
+x =  5.0: f(x) =  5.000, analytical grad =  4.000, auto grad =  4.000, match = True
+
+Testing gradient descent convergence:
+==================================================
+
+Test Case 1: Standard case (x=0, lr=0.1)
+--------------------------------------------------
+Starting gradient descent from x = 0.0000
+Learning rate = 0.1, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x =  0.00000, f(x) = 10.00000, grad = -6.00000
+Iter  10: x =  2.67788, f(x) =  1.10376, grad = -0.64425
+Iter  20: x =  2.96541, f(x) =  1.00120, grad = -0.06918
+Iter  30: x =  2.99629, f(x) =  1.00001, grad = -0.00743
+Iter  40: x =  2.99960, f(x) =  1.00000, grad = -0.00080
+Final: x = 2.99996, f(x) = 1.00000
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.000043
+Convergence test: Error = 0.000053 (should be < 0.01)
+Success: True
+
+==================================================
+
+Test Case 2: Left start (x=-2, lr=0.05)
+--------------------------------------------------
+Starting gradient descent from x = -2.0000
+Learning rate = 0.05, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x = -2.00000, f(x) = 26.00000, grad = -10.00000
+Iter  10: x =  1.25661, f(x) =  4.03942, grad = -3.48678
+Iter  20: x =  2.39212, f(x) =  1.36952, grad = -1.21577
+Iter  30: x =  2.78804, f(x) =  1.04493, grad = -0.42391
+Iter  40: x =  2.92610, f(x) =  1.00546, grad = -0.14781
+Final: x = 2.97423, f(x) = 1.00066
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.025769
+Convergence test: Error = 0.028632 (should be < 0.01)
+Success: False
+
+==================================================
+
+Test Case 3: Right start (x=8, lr=0.2)
+--------------------------------------------------
+Starting gradient descent from x = 8.0000
+Learning rate = 0.2, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x =  8.00000, f(x) = 26.00000, grad = 10.00000
+Iter  10: x =  3.03023, f(x) =  1.00091, grad =  0.06047
+Iter  20: x =  3.00018, f(x) =  1.00000, grad =  0.00037
+Iter  30: x =  3.00000, f(x) =  1.00000, grad =  0.00000
+Iter  32: x =  3.00000, f(x) =  1.00000, grad =  0.00000
+Convergence achieved at iteration 32!
+Final: x = 3.00000, f(x) = 1.00000
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.000000
+Convergence test: Error = 0.000000 (should be < 0.01)
+Success: True
+
+Generating convergence evolution plots...
+Convergence evolution plot saved to: outputs/gradient_descent_convergence.png
+
+Plotting target function...
+Plot saved to: outputs/gradient_descent_function.png
+
+Generating optimization path visualization...
+Starting gradient descent from x = 0.0000
+Learning rate = 0.1, Max iterations = 30
+------------------------------------------------------------
+Iter   0: x =  0.00000, f(x) = 10.00000, grad = -6.00000
+Iter  10: x =  2.67788, f(x) =  1.10376, grad = -0.64425
+Iter  20: x =  2.96541, f(x) =  1.00120, grad = -0.06918
+Final: x = 2.99629, f(x) = 1.00001
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.003714
+Optimization path plot saved to: outputs/gradient_descent_with_path.png
+
+======================================================================
+
+Comparing Manual Gradient Descent vs PyTorch Built-in Optimizers
+======================================================================
+
+1. Manual Gradient Descent
+------------------------------
+Starting gradient descent from x = 0.0000
+Learning rate = 0.1, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x =  0.00000, f(x) = 10.00000, grad = -6.00000
+Iter  10: x =  2.67788, f(x) =  1.10376, grad = -0.64425
+Iter  20: x =  2.96541, f(x) =  1.00120, grad = -0.06918
+Iter  30: x =  2.99629, f(x) =  1.00001, grad = -0.00743
+Iter  40: x =  2.99960, f(x) =  1.00000, grad = -0.00080
+Final: x = 2.99996, f(x) = 1.00000
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.000043
+
+2. PyTorch SGD
+---------------
+Starting SGD optimization from x = 0.0000
+Learning rate = 0.1, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x =  0.00000, f(x) = 10.00000, grad = -6.00000
+Iter  10: x =  2.67788, f(x) =  1.10376, grad = -0.64425
+Iter  20: x =  2.96541, f(x) =  1.00120, grad = -0.06918
+Iter  30: x =  2.99629, f(x) =  1.00001, grad = -0.00743
+Iter  40: x =  2.99960, f(x) =  1.00000, grad = -0.00080
+Final: x = 2.99996, f(x) = 1.00000
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.000043
+
+3. PyTorch SGD with Momentum
+-----------------------------
+Starting SGD with Momentum optimization from x = 0.0000
+Learning rate = 0.1, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x =  0.00000, f(x) = 10.00000, grad = -6.00000
+Iter  10: x =  2.98680, f(x) =  1.00017, grad = -0.02640
+Iter  20: x =  4.04776, f(x) =  2.09780, grad =  2.09552
+Iter  30: x =  2.86787, f(x) =  1.01746, grad = -0.26426
+Iter  40: x =  2.65191, f(x) =  1.12117, grad = -0.69618
+Final: x = 3.09150, f(x) = 1.00837
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.091495
+
+4. PyTorch Adam
+----------------
+Starting Adam optimization from x = 0.0000
+Learning rate = 0.1, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x =  0.00000, f(x) = 10.00000, grad = -6.00000
+Iter  10: x =  0.98581, f(x) =  5.05695, grad = -4.02838
+Iter  20: x =  1.88064, f(x) =  2.25297, grad = -2.23872
+Iter  30: x =  2.58022, f(x) =  1.17621, grad = -0.83955
+Iter  40: x =  3.00770, f(x) =  1.00006, grad =  0.01540
+Final: x = 3.16889, f(x) = 1.02852
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.168890
+
+5. PyTorch RMSprop
+-------------------
+Starting RMSprop optimization from x = 0.0000
+Learning rate = 0.1, Max iterations = 50
+------------------------------------------------------------
+Iter   0: x =  0.00000, f(x) = 10.00000, grad = -6.00000
+Iter  10: x =  2.85350, f(x) =  1.02146, grad = -0.29300
+Iter  20: x =  2.99221, f(x) =  1.00006, grad = -0.01559
+Iter  30: x =  2.99965, f(x) =  1.00000, grad = -0.00070
+Iter  40: x =  2.99999, f(x) =  1.00000, grad = -0.00003
+Iter  49: x =  3.00000, f(x) =  1.00000, grad = -0.00000
+Convergence achieved at iteration 49!
+Final: x = 3.00000, f(x) = 1.00000
+Theoretical minimum: x = 3.0, f(x) = 1.0
+Error: |x - 3| = 0.000000
+
+Optimizer Performance Analysis
+========================================
+Optimizer       Final x    Final f(x)   Error      Total Iter 1% Conv  0.1% Conv 
+-------------------------------------------------------------------------------------
+Manual GD       2.99995    1.00000      0.000053   50         17       22        
+PyTorch SGD     2.99995    1.00000      0.000053   50         17       22        
+PyTorch SGD + Momentum 3.17846    1.03185      0.178461   50         11       11        
+PyTorch Adam    3.16265    1.02646      0.162651   50         38       40        
+PyTorch RMSprop 3.00000    1.00000      0.000000   50         13       17        
+
+Performance Summary:
+Most Accurate: PyTorch RMSprop (error: 0.000000)
+Fastest to 1% accuracy: PyTorch SGD + Momentum (11 iterations)
+Fastest to 0.1% accuracy: PyTorch SGD + Momentum (11 iterations)
+
+Generating optimizer comparison plots...
+Optimizer comparison plot saved to: outputs/optimizer_comparison.png
+
+======================================================================
+Demo completed successfully!
+All plots saved to: outputs
