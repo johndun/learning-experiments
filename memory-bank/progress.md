@@ -29,7 +29,7 @@ Do not write separate test files. Validate functionality with inline print state
 
 ## Training and Demonstration
 
-- [ ] Generate XOR dataset directly in script for binary classification demo
+- [x] Generate XOR dataset directly in script for binary classification demo
 - [ ] Create complete training loop with epoch management
 - [ ] Implement simple batch processing for training
 - [ ] Add training progress tracking (loss over epochs)

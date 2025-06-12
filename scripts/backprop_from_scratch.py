@@ -1069,9 +1069,84 @@ def main():
     print("\nNumerical gradient checking completed successfully!")
     print("=" * 50)
 
-    # TODO: Generate XOR dataset
-    # TODO: Train network
-    # TODO: Visualize results
+    # Generate XOR dataset for binary classification demonstration
+    print("Generating XOR dataset for binary classification...")
+
+    def generate_xor_dataset() -> List[Tuple[List[float], List[float]]]:
+        """
+        Generate XOR dataset for binary classification.
+
+        XOR truth table:
+        Input1  Input2  Output
+        0       0       0
+        0       1       1
+        1       0       1
+        1       1       0
+
+        Returns:
+            List of (inputs, targets) tuples for XOR problem
+        """
+        xor_data = [
+            ([0.0, 0.0], [0.0]),  # 0 XOR 0 = 0
+            ([0.0, 1.0], [1.0]),  # 0 XOR 1 = 1
+            ([1.0, 0.0], [1.0]),  # 1 XOR 0 = 1
+            ([1.0, 1.0], [0.0])   # 1 XOR 1 = 0
+        ]
+        return xor_data
+
+    # Generate the XOR dataset
+    xor_dataset = generate_xor_dataset()
+
+    print("XOR Dataset Generated:")
+    print("Input1  Input2  Target")
+    print("-" * 20)
+    for inputs, targets in xor_dataset:
+        print(f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {targets[0]:4.1f}")
+
+    # Test network on XOR dataset before training
+    print(f"\nTesting untrained network on XOR dataset:")
+    xor_network = NeuralNetwork([2, 4, 1], 'sigmoid')  # 2 inputs, 4 hidden neurons, 1 output
+
+    print("Untrained Network Predictions:")
+    print("Input1  Input2  Prediction  Target  Error")
+    print("-" * 40)
+
+    total_error = 0.0
+    for inputs, targets in xor_dataset:
+        prediction = xor_network.forward(inputs)
+        error = abs(prediction[0] - targets[0])
+        total_error += error
+        print(f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {prediction[0]:8.4f}  {targets[0]:4.1f}  {error:6.4f}")
+
+    avg_error = total_error / len(xor_dataset)
+    print(f"Average prediction error (untrained): {avg_error:.4f}")
+
+    # Verify XOR dataset is non-linearly separable
+    print(f"\nXOR Problem Analysis:")
+    print("The XOR problem is a classic example of a non-linearly separable dataset.")
+    print("A single perceptron cannot solve XOR, but a multi-layer network can.")
+    print("This demonstrates the power of hidden layers in neural networks.")
+
+    # Show that simple linear classification fails
+    print(f"\nLinear separability check:")
+    print("For linear separability, we need to find weights w1, w2, bias b such that:")
+    print("  w1*x1 + w2*x2 + b > 0 for positive class")
+    print("  w1*x1 + w2*x2 + b < 0 for negative class")
+    print()
+    print("XOR truth table analysis:")
+    print("  (0,0) -> 0: Need w1*0 + w2*0 + b < 0, so b < 0")
+    print("  (0,1) -> 1: Need w1*0 + w2*1 + b > 0, so w2 + b > 0")
+    print("  (1,0) -> 1: Need w1*1 + w2*0 + b > 0, so w1 + b > 0")
+    print("  (1,1) -> 0: Need w1*1 + w2*1 + b < 0, so w1 + w2 + b < 0")
+    print()
+    print("From constraints 2 and 3: w1 > -b and w2 > -b")
+    print("From constraint 4: w1 + w2 < -b")
+    print("This gives us: w1 + w2 < -b < w1 and w1 + w2 < -b < w2")
+    print("This is impossible since w1 + w2 cannot be less than both w1 and w2!")
+    print("Therefore, XOR is NOT linearly separable.")
+
+    print("\nXOR dataset generation completed successfully!")
+    print("=" * 50)
 
     print("Implementation complete with validated backpropagation!")
 
