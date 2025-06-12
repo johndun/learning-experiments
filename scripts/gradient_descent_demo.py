@@ -21,6 +21,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import List, Tuple, Optional
+from pathlib import Path
 
 
 def target_function(x: torch.Tensor) -> torch.Tensor:
@@ -51,13 +52,18 @@ def analytical_gradient(x: torch.Tensor) -> torch.Tensor:
     return 2 * (x - 3)
 
 
-def plot_function(x_range: Tuple[float, float] = (-2, 8), num_points: int = 1000) -> None:
+def plot_function(
+    x_range: Tuple[float, float] = (-2, 8),
+    num_points: int = 1000,
+    output_file: str = "gradient_descent_function.png"
+) -> None:
     """
-    Plot the target function over a specified range.
+    Plot the target function over a specified range and save to file.
 
     Args:
         x_range: Tuple of (min_x, max_x) for plotting range
         num_points: Number of points to use for smooth curve
+        output_file: Filename to save the plot to
     """
     x_vals = torch.linspace(x_range[0], x_range[1], num_points)
     y_vals = target_function(x_vals)
@@ -71,7 +77,10 @@ def plot_function(x_range: Tuple[float, float] = (-2, 8), num_points: int = 1000
     plt.title('Target Function: f(x) = (x - 3)² + 1')
     plt.grid(True, alpha=0.3)
     plt.legend()
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Plot saved to: {output_file}")
 
 
 def test_function_and_gradient():
@@ -108,12 +117,17 @@ def main():
     print(f"PyTorch version: {torch.__version__}")
     print("Script initialized successfully!")
 
+    # Create output directory
+    output_dir = Path("outputs")
+    output_dir.mkdir(exist_ok=True)
+
     # Test function and gradient computation
     test_function_and_gradient()
 
-    # Plot the target function
+    # Plot the target function and save to file
     print("\nPlotting target function...")
-    plot_function()
+    output_file = output_dir / "gradient_descent_function.png"
+    plot_function(output_file=str(output_file))
 
 
 if __name__ == "__main__":
