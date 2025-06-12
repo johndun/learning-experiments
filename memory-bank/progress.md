@@ -15,14 +15,14 @@ Do not write separate test files. Validate functionality with inline print state
 ## Core Neural Network Components (All in Single Script)
 
 - [x] Define simple neuron/layer data structures using basic Python data types
-- [ ] Implement forward propagation function that processes input through network layers
-- [ ] Store intermediate activations during forward pass for backpropagation use
-- [ ] Create network initialization function for weights and biases
+- [x] Implement forward propagation function that processes input through network layers
+- [x] Store intermediate activations during forward pass for backpropagation use
+- [x] Create network initialization function for weights and biases
 
 ## Backpropagation Algorithm Implementation
 
 - [x] Implement gradient calculation for output layer using chain rule
-- [ ] Implement gradient calculation for hidden layers propagating error backwards
+- [x] Implement gradient calculation for hidden layers propagating error backwards
 - [ ] Validate gradients using numerical gradient checking
 - [ ] Calculate weight and bias gradients for all layers
 - [ ] Implement gradient descent parameter update function

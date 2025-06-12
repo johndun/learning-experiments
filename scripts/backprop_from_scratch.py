@@ -498,6 +498,7 @@ class NeuralNetwork:
         Backward pass (backpropagation) through the network.
 
         Computes gradients for all weights and biases using chain rule.
+        Propagates error backwards from output layer through all hidden layers.
 
         Args:
             targets: Target values for training
@@ -548,13 +549,29 @@ class NeuralNetwork:
             raise ValueError(f"Unknown loss function: {loss_function}")
 
         # Step 2: Calculate output layer gradients
-        output_deltas = self._calculate_output_layer_gradients(output_layer, loss_gradients)
+        current_deltas = self._calculate_output_layer_gradients(output_layer, loss_gradients)
 
         # Step 3: Calculate weight and bias gradients for output layer
         self._calculate_layer_weight_bias_gradients(
-            output_layer, output_deltas, output_layer_idx,
+            output_layer, current_deltas, output_layer_idx,
             weight_gradients, bias_gradients
         )
+
+        # Step 4: Propagate gradients backward through hidden layers
+        for layer_idx in range(len(self.layers) - 2, -1, -1):  # Go backwards through hidden layers
+            current_layer = self.layers[layer_idx]
+            next_layer = self.layers[layer_idx + 1]
+
+            # Calculate deltas for current hidden layer
+            current_deltas = self._calculate_hidden_layer_gradients(
+                current_layer, next_layer, current_deltas
+            )
+
+            # Calculate weight and bias gradients for current layer
+            self._calculate_layer_weight_bias_gradients(
+                current_layer, current_deltas, layer_idx,
+                weight_gradients, bias_gradients
+            )
 
         return weight_gradients, bias_gradients
 
@@ -582,6 +599,43 @@ class NeuralNetwork:
 
             # Chain rule: dL/dWeightedSum = dL/dOutput * dOutput/dWeightedSum
             delta = loss_grad * activation_derivative
+            deltas.append(delta)
+
+        return deltas
+
+    def _calculate_hidden_layer_gradients(self, current_layer: Layer, next_layer: Layer,
+                                        next_deltas: List[float]) -> List[float]:
+        """
+        Calculate gradients for hidden layer using chain rule.
+
+        For hidden layer: delta = sum(next_delta * connecting_weight) * activation_derivative
+
+        This implements the backpropagation equation for hidden layers where the error
+        is propagated backwards from the next layer.
+
+        Args:
+            current_layer: The current hidden layer
+            next_layer: The next layer (closer to output)
+            next_deltas: Delta values from the next layer
+
+        Returns:
+            List of delta values for each neuron in current layer
+        """
+        deltas = []
+
+        for i, neuron in enumerate(current_layer.neurons):
+            # Sum of (next_layer_delta * weight_connecting_to_next_neuron)
+            error_sum = 0.0
+
+            for j, next_neuron in enumerate(next_layer.neurons):
+                # Weight from current neuron i to next neuron j
+                connecting_weight = next_neuron.weights[i]
+                error_sum += next_deltas[j] * connecting_weight
+
+            # Multiply by activation function derivative
+            activation_derivative = neuron.get_activation_derivative()
+            delta = error_sum * activation_derivative
+
             deltas.append(delta)
 
         return deltas
