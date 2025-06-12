@@ -16,9 +16,7 @@ This script demonstrates:
 
 import math
 import random
-from typing import List, Tuple, Callable
-import matplotlib.pyplot as plt
-import numpy as np
+from collections.abc import Callable
 
 
 # Basic Mathematical Functions
@@ -72,7 +70,7 @@ def relu_derivative(x: float) -> float:
 
 
 # Loss Functions
-def mean_squared_error(predictions: List[float], targets: List[float]) -> float:
+def mean_squared_error(predictions: list[float], targets: list[float]) -> float:
     """
     Compute mean squared error loss.
 
@@ -100,7 +98,7 @@ def mean_squared_error(predictions: List[float], targets: List[float]) -> float:
     return total_error / n
 
 
-def mse_derivative(predictions: List[float], targets: List[float]) -> List[float]:
+def mse_derivative(predictions: list[float], targets: list[float]) -> list[float]:
     """
     Compute derivative of mean squared error with respect to predictions.
 
@@ -128,7 +126,7 @@ def mse_derivative(predictions: List[float], targets: List[float]) -> List[float
     return gradients
 
 
-def binary_cross_entropy(predictions: List[float], targets: List[float]) -> float:
+def binary_cross_entropy(predictions: list[float], targets: list[float]) -> float:
     """
     Compute binary cross-entropy loss.
 
@@ -162,7 +160,7 @@ def binary_cross_entropy(predictions: List[float], targets: List[float]) -> floa
     return total_loss / n
 
 
-def bce_derivative(predictions: List[float], targets: List[float]) -> List[float]:
+def bce_derivative(predictions: list[float], targets: list[float]) -> list[float]:
     """
     Compute derivative of binary cross-entropy with respect to predictions.
 
@@ -200,18 +198,18 @@ def bce_derivative(predictions: List[float], targets: List[float]) -> List[float
 class Matrix:
     """Simple matrix implementation for neural network operations."""
 
-    def __init__(self, data: List[List[float]]):
+    def __init__(self, data: list[list[float]]):
         """Initialize matrix with 2D list of floats."""
         self.data = data
         self.rows = len(data)
         self.cols = len(data[0]) if data else 0
 
-    def __getitem__(self, key: Tuple[int, int]) -> float:
+    def __getitem__(self, key: tuple[int, int]) -> float:
         """Get element at row, col."""
         row, col = key
         return self.data[row][col]
 
-    def __setitem__(self, key: Tuple[int, int], value: float):
+    def __setitem__(self, key: tuple[int, int], value: float):
         """Set element at row, col."""
         row, col = key
         self.data[row][col] = value
@@ -224,7 +222,9 @@ class Matrix:
     def multiply(self, other: 'Matrix') -> 'Matrix':
         """Matrix multiplication."""
         if self.cols != other.rows:
-            raise ValueError(f"Cannot multiply {self.rows}x{self.cols} and {other.rows}x{other.cols}")
+            raise ValueError(
+                f"Cannot multiply {self.rows}x{self.cols} and {other.rows}x{other.cols}"
+            )
 
         result = [[0.0 for _ in range(other.cols)] for _ in range(self.rows)]
 
@@ -265,7 +265,7 @@ class Matrix:
                   for i in range(self.rows)]
         return Matrix(result)
 
-    def to_list(self) -> List[List[float]]:
+    def to_list(self) -> list[list[float]]:
         """Convert to list of lists."""
         return [row[:] for row in self.data]
 
@@ -275,28 +275,28 @@ class Matrix:
 
 
 # Vector Operations
-def dot_product(a: List[float], b: List[float]) -> float:
+def dot_product(a: list[float], b: list[float]) -> float:
     """Compute dot product of two vectors."""
     if len(a) != len(b):
         raise ValueError("Vectors must have same length")
     return sum(a[i] * b[i] for i in range(len(a)))
 
 
-def vector_add(a: List[float], b: List[float]) -> List[float]:
+def vector_add(a: list[float], b: list[float]) -> list[float]:
     """Add two vectors element-wise."""
     if len(a) != len(b):
         raise ValueError("Vectors must have same length")
     return [a[i] + b[i] for i in range(len(a))]
 
 
-def vector_subtract(a: List[float], b: List[float]) -> List[float]:
+def vector_subtract(a: list[float], b: list[float]) -> list[float]:
     """Subtract two vectors element-wise."""
     if len(a) != len(b):
         raise ValueError("Vectors must have same length")
     return [a[i] - b[i] for i in range(len(a))]
 
 
-def vector_scalar_multiply(vector: List[float], scalar: float) -> List[float]:
+def vector_scalar_multiply(vector: list[float], scalar: float) -> list[float]:
     """Multiply vector by scalar."""
     return [x * scalar for x in vector]
 
@@ -323,7 +323,7 @@ class Neuron:
         self.last_weighted_sum = None
         self.last_output = None
 
-    def forward(self, inputs: List[float]) -> float:
+    def forward(self, inputs: list[float]) -> float:
         """
         Forward pass through neuron.
 
@@ -390,7 +390,7 @@ class Layer:
         # Storage for layer outputs (needed for backprop)
         self.last_outputs = None
 
-    def forward(self, inputs: List[float]) -> List[float]:
+    def forward(self, inputs: list[float]) -> list[float]:
         """
         Forward pass through entire layer.
 
@@ -415,11 +415,11 @@ class Layer:
             weights_data.append(neuron.weights[:])
         return Matrix(weights_data)
 
-    def get_biases(self) -> List[float]:
+    def get_biases(self) -> list[float]:
         """Return biases as list for layer."""
         return [neuron.bias for neuron in self.neurons]
 
-    def update_weights(self, weight_gradients: List[List[float]], learning_rate: float):
+    def update_weights(self, weight_gradients: list[list[float]], learning_rate: float):
         """
         Update neuron weights using gradients.
 
@@ -431,7 +431,7 @@ class Layer:
             for j in range(len(neuron.weights)):
                 neuron.weights[j] -= learning_rate * weight_gradients[i][j]
 
-    def update_biases(self, bias_gradients: List[float], learning_rate: float):
+    def update_biases(self, bias_gradients: list[float], learning_rate: float):
         """
         Update neuron biases using gradients.
 
@@ -446,7 +446,7 @@ class Layer:
 class NeuralNetwork:
     """Simple feedforward neural network implementation."""
 
-    def __init__(self, layer_sizes: List[int], activation_func: str = 'sigmoid'):
+    def __init__(self, layer_sizes: list[int], activation_func: str = 'sigmoid'):
         """
         Initialize neural network with specified architecture.
 
@@ -471,7 +471,7 @@ class NeuralNetwork:
             layer = Layer(num_neurons, num_inputs, layer_activation)
             self.layers.append(layer)
 
-    def forward(self, inputs: List[float]) -> List[float]:
+    def forward(self, inputs: list[float]) -> list[float]:
         """
         Forward pass through entire network.
 
@@ -489,11 +489,13 @@ class NeuralNetwork:
 
         return current_inputs
 
-    def get_layer_outputs(self) -> List[List[float]]:
+    def get_layer_outputs(self) -> list[list[float]]:
         """Get outputs from all layers (for debugging/visualization)."""
         return [layer.last_outputs[:] for layer in self.layers if layer.last_outputs is not None]
 
-    def backward(self, targets: List[float], loss_function: str = 'mse') -> Tuple[List[List[List[float]]], List[List[float]]]:
+    def backward(
+        self, targets: list[float], loss_function: str = 'mse'
+    ) -> tuple[list[list[list[float]]], list[list[float]]]:
         """
         Backward pass (backpropagation) through the network.
 
@@ -575,7 +577,9 @@ class NeuralNetwork:
 
         return weight_gradients, bias_gradients
 
-    def _calculate_output_layer_gradients(self, output_layer: Layer, loss_gradients: List[float]) -> List[float]:
+    def _calculate_output_layer_gradients(
+        self, output_layer: Layer, loss_gradients: list[float]
+    ) -> list[float]:
         """
         Calculate gradients for output layer using chain rule.
 
@@ -604,7 +608,7 @@ class NeuralNetwork:
         return deltas
 
     def _calculate_hidden_layer_gradients(self, current_layer: Layer, next_layer: Layer,
-                                        next_deltas: List[float]) -> List[float]:
+                                        next_deltas: list[float]) -> list[float]:
         """
         Calculate gradients for hidden layer using chain rule.
 
@@ -640,9 +644,10 @@ class NeuralNetwork:
 
         return deltas
 
-    def _calculate_layer_weight_bias_gradients(self, layer: Layer, deltas: List[float],
-                                             layer_idx: int, weight_gradients: List[List[List[float]]],
-                                             bias_gradients: List[List[float]]):
+    def _calculate_layer_weight_bias_gradients(
+        self, layer: Layer, deltas: list[float], layer_idx: int,
+        weight_gradients: list[list[list[float]]], bias_gradients: list[list[float]]
+    ):
         """
         Calculate weight and bias gradients for a layer given its deltas.
 
@@ -669,8 +674,10 @@ class NeuralNetwork:
             for j, input_val in enumerate(neuron.last_input):
                 weight_gradients[layer_idx][i][j] = delta * input_val
 
-    def numerical_gradient_check(self, inputs: List[float], targets: List[float],
-                               loss_function: str = 'mse', epsilon: float = 1e-5) -> Tuple[float, float]:
+    def numerical_gradient_check(
+        self, inputs: list[float], targets: list[float],
+        loss_function: str = 'mse', epsilon: float = 1e-5
+    ) -> tuple[float, float]:
         """
         Validate analytical gradients using numerical gradient checking.
 
@@ -799,8 +806,8 @@ class NeuralNetwork:
 
         return max_weight_error, max_bias_error
 
-    def update_parameters(self, weight_gradients: List[List[List[float]]],
-                         bias_gradients: List[List[float]], learning_rate: float):
+    def update_parameters(self, weight_gradients: list[list[list[float]]],
+                         bias_gradients: list[list[float]], learning_rate: float):
         """
         Update all network parameters using gradient descent.
 
@@ -824,7 +831,7 @@ class NeuralNetwork:
             layer.update_weights(weight_gradients[layer_idx], learning_rate)
             layer.update_biases(bias_gradients[layer_idx], learning_rate)
 
-    def train_step(self, inputs: List[float], targets: List[float], learning_rate: float = 0.1,
+    def train_step(self, inputs: list[float], targets: list[float], learning_rate: float = 0.1,
                    loss_function: str = 'mse') -> float:
         """
         Perform one training step: forward pass, backward pass, and parameter update.
@@ -857,8 +864,8 @@ class NeuralNetwork:
 
         return loss
 
-    def train(self, training_data: List[Tuple[List[float], List[float]]], epochs: int = 100,
-              learning_rate: float = 0.1, loss_function: str = 'mse', verbose: bool = True) -> List[float]:
+    def train(self, training_data: list[tuple[list[float], list[float]]], epochs: int = 100,
+              learning_rate: float = 0.1, loss_function: str = 'mse', verbose: bool = True) -> list[float]:
         """
         Train the network on a dataset for multiple epochs.
 
@@ -916,13 +923,13 @@ def main():
     print(result)
 
     # Test activation functions
-    print(f"\nTesting activation functions:")
+    print("\nTesting activation functions:")
     print(f"sigmoid(0) = {sigmoid(0.0):.4f}")
     print(f"tanh(1) = {tanh(1.0):.4f}")
     print(f"relu(-1) = {relu(-1.0):.4f}")
 
     # Test activation function derivatives
-    print(f"\nTesting activation function derivatives:")
+    print("\nTesting activation function derivatives:")
     print(f"sigmoid_derivative(0) = {sigmoid_derivative(0.0):.4f}")
     print(f"tanh_derivative(1) = {tanh_derivative(1.0):.4f}")
     print(f"relu_derivative(1) = {relu_derivative(1.0):.4f}")
@@ -935,7 +942,7 @@ def main():
     print(f"Vector addition: {vector_add(v1, v2)}")
 
     # Test loss functions
-    print(f"\nTesting loss functions:")
+    print("\nTesting loss functions:")
     predictions = [0.8, 0.3, 0.9, 0.1]
     targets = [1.0, 0.0, 1.0, 0.0]
 
@@ -990,7 +997,7 @@ def main():
     # Backward pass
     weight_grads, bias_grads = simple_network.backward(test_targets, 'mse')
 
-    print(f"Computed gradients successfully!")
+    print("Computed gradients successfully!")
     print(f"Weight gradients shape: {len(weight_grads)} layers")
     print(f"Layer 0 weight gradients: {len(weight_grads[0])} neurons, {len(weight_grads[0][0])} weights each")
     print(f"First neuron weight gradients: {[f'{g:.4f}' for g in weight_grads[0][0]]}")
@@ -1021,7 +1028,7 @@ def main():
         test_inputs, test_targets, 'mse', epsilon=1e-5
     )
 
-    print(f"\nGradient Check Results:")
+    print("\nGradient Check Results:")
     print(f"Maximum weight gradient error: {max_weight_error:.10f}")
     print(f"Maximum bias gradient error: {max_bias_error:.10f}")
 
@@ -1040,7 +1047,7 @@ def main():
         test_inputs, test_targets, 'mse', epsilon=1e-5
     )
 
-    print(f"\nComplex Network Gradient Check Results:")
+    print("\nComplex Network Gradient Check Results:")
     print(f"Maximum weight gradient error: {max_weight_error_complex:.10f}")
     print(f"Maximum bias gradient error: {max_bias_error_complex:.10f}")
 
@@ -1057,7 +1064,7 @@ def main():
         test_inputs, test_targets, 'binary_crossentropy', epsilon=1e-5
     )
 
-    print(f"\nBCE Gradient Check Results:")
+    print("\nBCE Gradient Check Results:")
     print(f"Maximum weight gradient error: {max_weight_error_bce:.10f}")
     print(f"Maximum bias gradient error: {max_bias_error_bce:.10f}")
 
@@ -1072,7 +1079,7 @@ def main():
     # Generate XOR dataset for binary classification demonstration
     print("Generating XOR dataset for binary classification...")
 
-    def generate_xor_dataset() -> List[Tuple[List[float], List[float]]]:
+    def generate_xor_dataset() -> list[tuple[list[float], list[float]]]:
         """
         Generate XOR dataset for binary classification.
 
@@ -1104,7 +1111,7 @@ def main():
         print(f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {targets[0]:4.1f}")
 
     # Test network on XOR dataset before training
-    print(f"\nTesting untrained network on XOR dataset:")
+    print("\nTesting untrained network on XOR dataset:")
     xor_network = NeuralNetwork([2, 4, 1], 'sigmoid')  # 2 inputs, 4 hidden neurons, 1 output
 
     print("Untrained Network Predictions:")
@@ -1122,13 +1129,13 @@ def main():
     print(f"Average prediction error (untrained): {avg_error:.4f}")
 
     # Verify XOR dataset is non-linearly separable
-    print(f"\nXOR Problem Analysis:")
+    print("\nXOR Problem Analysis:")
     print("The XOR problem is a classic example of a non-linearly separable dataset.")
     print("A single perceptron cannot solve XOR, but a multi-layer network can.")
     print("This demonstrates the power of hidden layers in neural networks.")
 
     # Show that simple linear classification fails
-    print(f"\nLinear separability check:")
+    print("\nLinear separability check:")
     print("For linear separability, we need to find weights w1, w2, bias b such that:")
     print("  w1*x1 + w2*x2 + b > 0 for positive class")
     print("  w1*x1 + w2*x2 + b < 0 for negative class")
@@ -1146,6 +1153,106 @@ def main():
     print("Therefore, XOR is NOT linearly separable.")
 
     print("\nXOR dataset generation completed successfully!")
+    print("=" * 50)
+
+    # Complete Training Loop Demonstration
+    print("Demonstrating complete training loop with epoch management...")
+
+    # Create network for XOR training
+    print("\nInitializing network for XOR training:")
+    print("Architecture: 2 inputs -> 4 hidden neurons -> 1 output")
+    training_network = NeuralNetwork([2, 4, 1], 'sigmoid')
+
+    # Training parameters
+    epochs = 1000
+    learning_rate = 5.0  # Higher learning rate for faster convergence on simple XOR
+    loss_function = 'mse'
+
+    print("Training parameters:")
+    print(f"  Epochs: {epochs}")
+    print(f"  Learning rate: {learning_rate}")
+    print(f"  Loss function: {loss_function}")
+    print(f"  Dataset size: {len(xor_dataset)} examples")
+
+    # Train the network
+    print("\nStarting training...")
+    print("Progress will be reported every 100 epochs")
+    print("-" * 50)
+
+    loss_history = training_network.train(
+        training_data=xor_dataset,
+        epochs=epochs,
+        learning_rate=learning_rate,
+        loss_function=loss_function,
+        verbose=True
+    )
+
+    print("-" * 50)
+    print("Training completed!")
+
+    # Test trained network performance
+    print("\nTesting trained network on XOR dataset:")
+    print("Input1  Input2  Prediction  Target  Error")
+    print("-" * 40)
+
+    total_error_trained = 0.0
+    for inputs, targets in xor_dataset:
+        prediction = training_network.forward(inputs)
+        error = abs(prediction[0] - targets[0])
+        total_error_trained += error
+        print(f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {prediction[0]:8.4f}  {targets[0]:4.1f}  {error:6.4f}")
+
+    avg_error_trained = total_error_trained / len(xor_dataset)
+    print(f"Average prediction error (trained): {avg_error_trained:.6f}")
+    print(f"Improvement from untrained: {avg_error - avg_error_trained:.6f}")
+
+    # Training analysis
+    print("\nTraining Analysis:")
+    print(f"Initial loss: {loss_history[0]:.6f}")
+    print(f"Final loss: {loss_history[-1]:.6f}")
+    print(f"Loss reduction: {loss_history[0] - loss_history[-1]:.6f}")
+    print(f"Convergence achieved: {'Yes' if loss_history[-1] < 0.01 else 'No'}")
+
+    # Check if network learned XOR function
+    tolerance = 0.1  # Allow 10% error for binary classification
+    correct_predictions = 0
+
+    print(f"\nBinary Classification Results (tolerance: {tolerance}):")
+    for inputs, targets in xor_dataset:
+        prediction = training_network.forward(inputs)
+        predicted_class = 1.0 if prediction[0] > 0.5 else 0.0
+        target_class = targets[0]
+        correct = abs(predicted_class - target_class) < tolerance
+        correct_predictions += int(correct)
+
+        print(f"Input: ({inputs[0]}, {inputs[1]}) -> "
+              f"Raw: {prediction[0]:.4f}, "
+              f"Class: {predicted_class}, "
+              f"Target: {target_class}, "
+              f"{'✓' if correct else '✗'}")
+
+    accuracy = correct_predictions / len(xor_dataset)
+    print(f"\nClassification Accuracy: {accuracy:.1%} ({correct_predictions}/{len(xor_dataset)})")
+
+    if accuracy >= 1.0:
+        print("🎉 SUCCESS! Network successfully learned the XOR function!")
+    elif accuracy >= 0.75:
+        print("📈 GOOD! Network learned most of the XOR function.")
+    else:
+        print("📉 Network struggled to learn XOR. May need more training or different parameters.")
+
+    # Training loop demonstration summary
+    print("\n" + "=" * 50)
+    print("TRAINING LOOP DEMONSTRATION COMPLETE")
+    print("=" * 50)
+    print("✅ Implemented complete training loop with:")
+    print("   • Epoch management and progress tracking")
+    print("   • Loss computation and monitoring")
+    print("   • Parameter updates via gradient descent")
+    print("   • Training progress reporting")
+    print("   • Performance evaluation on test data")
+    print("   • Convergence analysis")
+    print("   • Binary classification metrics")
     print("=" * 50)
 
     print("Implementation complete with validated backpropagation!")

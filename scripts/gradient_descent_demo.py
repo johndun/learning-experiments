@@ -17,12 +17,11 @@ differentiation for accurate gradient computation.
 Author: Learning Experiments
 """
 
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
-import matplotlib.pyplot as plt
-import numpy as np
-from typing import List, Tuple, Optional, Dict
-from pathlib import Path
 
 
 def target_function(x: torch.Tensor) -> torch.Tensor:
@@ -54,7 +53,7 @@ def analytical_gradient(x: torch.Tensor) -> torch.Tensor:
 
 
 def plot_function(
-    x_range: Tuple[float, float] = (-2, 8),
+    x_range: tuple[float, float] = (-2, 8),
     num_points: int = 1000,
     output_file: str = "gradient_descent_function.png"
 ) -> None:
@@ -85,9 +84,9 @@ def plot_function(
 
 
 def plot_function_with_optimization_path(
-    param_history: List[float],
-    function_history: List[float],
-    x_range: Tuple[float, float] = (-2, 8),
+    param_history: list[float],
+    function_history: list[float],
+    x_range: tuple[float, float] = (-2, 8),
     num_points: int = 1000,
     output_file: str = "gradient_descent_with_path.png"
 ) -> None:
@@ -151,7 +150,7 @@ def gradient_descent(
     learning_rate: float = 0.1,
     num_iterations: int = 100,
     tolerance: float = 1e-6
-) -> Tuple[List[float], List[float]]:
+) -> tuple[list[float], list[float]]:
     """
     Manual gradient descent algorithm implementation using PyTorch's automatic differentiation.
 
@@ -210,7 +209,7 @@ def gradient_descent(
 
     # Final state
     print(f"Final: x = {x.item():.5f}, f(x) = {target_function(x).item():.5f}")
-    print(f"Theoretical minimum: x = 3.0, f(x) = 1.0")
+    print("Theoretical minimum: x = 3.0, f(x) = 1.0")
     print(f"Error: |x - 3| = {abs(x.item() - 3.0):.6f}")
 
     return param_history, function_history
@@ -244,9 +243,9 @@ def test_function_and_gradient():
 
 
 def plot_convergence_evolution(
-    param_histories: List[List[float]],
-    function_histories: List[List[float]],
-    labels: List[str],
+    param_histories: list[list[float]],
+    function_histories: list[list[float]],
+    labels: list[str],
     output_file: str = "gradient_descent_convergence.png"
 ) -> None:
     """
@@ -263,7 +262,7 @@ def plot_convergence_evolution(
     colors = ['blue', 'red', 'green', 'purple', 'orange']
 
     # Plot parameter evolution
-    for i, (param_hist, label) in enumerate(zip(param_histories, labels)):
+    for i, (param_hist, label) in enumerate(zip(param_histories, labels, strict=False)):
         iterations = range(len(param_hist))
         color = colors[i % len(colors)]
         ax1.plot(iterations, param_hist, 'o-', color=color, markersize=3,
@@ -278,7 +277,7 @@ def plot_convergence_evolution(
     ax1.legend()
 
     # Plot function value evolution (loss)
-    for i, (func_hist, label) in enumerate(zip(function_histories, labels)):
+    for i, (func_hist, label) in enumerate(zip(function_histories, labels, strict=False)):
         iterations = range(len(func_hist))
         color = colors[i % len(colors)]
         ax2.semilogy(iterations, func_hist, 'o-', color=color, markersize=3,
@@ -306,7 +305,7 @@ def pytorch_optimizer_test(
     num_iterations: int = 100,
     tolerance: float = 1e-6,
     **optimizer_kwargs
-) -> Tuple[List[float], List[float]]:
+) -> tuple[list[float], list[float]]:
     """
     Test PyTorch's built-in optimizers on the target function.
 
@@ -364,7 +363,7 @@ def pytorch_optimizer_test(
 
     # Final state
     print(f"Final: x = {x.item():.5f}, f(x) = {target_function(x).item():.5f}")
-    print(f"Theoretical minimum: x = 3.0, f(x) = 1.0")
+    print("Theoretical minimum: x = 3.0, f(x) = 1.0")
     print(f"Error: |x - 3| = {abs(x.item() - 3.0):.6f}")
 
     return param_history, function_history
@@ -374,7 +373,7 @@ def compare_optimizers(
     initial_x: float = 0.0,
     learning_rate: float = 0.1,
     num_iterations: int = 50
-) -> Dict[str, Tuple[List[float], List[float]]]:
+) -> dict[str, tuple[list[float], list[float]]]:
     """
     Compare manual gradient descent with PyTorch's built-in optimizers.
 
@@ -454,7 +453,7 @@ def compare_optimizers(
 
 
 def plot_optimizer_comparison(
-    optimizer_results: Dict[str, Tuple[List[float], List[float]]],
+    optimizer_results: dict[str, tuple[list[float], list[float]]],
     output_file: str = "optimizer_comparison.png"
 ) -> None:
     """
@@ -512,7 +511,7 @@ def plot_optimizer_comparison(
 
 
 def analyze_optimizer_performance(
-    optimizer_results: Dict[str, Tuple[List[float], List[float]]]
+    optimizer_results: dict[str, tuple[list[float], list[float]]]
 ) -> None:
     """
     Analyze and compare the performance of different optimizers.
@@ -567,7 +566,7 @@ def analyze_optimizer_performance(
     best_speed_1_percent = min(analysis_data, key=lambda x: x['iter_1_percent'])
     best_speed_01_percent = min(analysis_data, key=lambda x: x['iter_01_percent'])
 
-    print(f"\nPerformance Summary:")
+    print("\nPerformance Summary:")
     print(f"Most Accurate: {best_accuracy['name']} (error: {best_accuracy['error']:.6f})")
     print(f"Fastest to 1% accuracy: {best_speed_1_percent['name']} ({best_speed_1_percent['iter_1_percent']} iterations)")
     print(f"Fastest to 0.1% accuracy: {best_speed_01_percent['name']} ({best_speed_01_percent['iter_01_percent']} iterations)")
