@@ -799,6 +799,99 @@ class NeuralNetwork:
 
         return max_weight_error, max_bias_error
 
+    def update_parameters(self, weight_gradients: List[List[List[float]]],
+                         bias_gradients: List[List[float]], learning_rate: float):
+        """
+        Update all network parameters using gradient descent.
+
+        This method applies the gradient descent update rule:
+        weight = weight - learning_rate * gradient
+        bias = bias - learning_rate * gradient
+
+        Args:
+            weight_gradients: 3D list where weight_gradients[layer][neuron][weight] = gradient
+            bias_gradients: 2D list where bias_gradients[layer][neuron] = gradient
+            learning_rate: Learning rate for gradient descent step size
+        """
+        if len(weight_gradients) != len(self.layers):
+            raise ValueError(f"Expected {len(self.layers)} layers of weight gradients, got {len(weight_gradients)}")
+
+        if len(bias_gradients) != len(self.layers):
+            raise ValueError(f"Expected {len(self.layers)} layers of bias gradients, got {len(bias_gradients)}")
+
+        # Update parameters for each layer
+        for layer_idx, layer in enumerate(self.layers):
+            layer.update_weights(weight_gradients[layer_idx], learning_rate)
+            layer.update_biases(bias_gradients[layer_idx], learning_rate)
+
+    def train_step(self, inputs: List[float], targets: List[float], learning_rate: float = 0.1,
+                   loss_function: str = 'mse') -> float:
+        """
+        Perform one training step: forward pass, backward pass, and parameter update.
+
+        Args:
+            inputs: Network input values
+            targets: Target values for training
+            learning_rate: Learning rate for gradient descent
+            loss_function: Loss function to use ('mse' or 'binary_crossentropy')
+
+        Returns:
+            Loss value after forward pass (before parameter update)
+        """
+        # Forward pass
+        predictions = self.forward(inputs)
+
+        # Calculate loss
+        if loss_function == 'mse':
+            loss = mean_squared_error(predictions, targets)
+        elif loss_function == 'binary_crossentropy':
+            loss = binary_cross_entropy(predictions, targets)
+        else:
+            raise ValueError(f"Unknown loss function: {loss_function}")
+
+        # Backward pass
+        weight_gradients, bias_gradients = self.backward(targets, loss_function)
+
+        # Update parameters
+        self.update_parameters(weight_gradients, bias_gradients, learning_rate)
+
+        return loss
+
+    def train(self, training_data: List[Tuple[List[float], List[float]]], epochs: int = 100,
+              learning_rate: float = 0.1, loss_function: str = 'mse', verbose: bool = True) -> List[float]:
+        """
+        Train the network on a dataset for multiple epochs.
+
+        Args:
+            training_data: List of (inputs, targets) tuples
+            epochs: Number of training epochs
+            learning_rate: Learning rate for gradient descent
+            loss_function: Loss function to use ('mse' or 'binary_crossentropy')
+            verbose: Whether to print training progress
+
+        Returns:
+            List of average loss values for each epoch
+        """
+        loss_history = []
+
+        for epoch in range(epochs):
+            epoch_losses = []
+
+            # Train on each example in the dataset
+            for inputs, targets in training_data:
+                loss = self.train_step(inputs, targets, learning_rate, loss_function)
+                epoch_losses.append(loss)
+
+            # Calculate average loss for this epoch
+            avg_loss = sum(epoch_losses) / len(epoch_losses)
+            loss_history.append(avg_loss)
+
+            # Print progress
+            if verbose and (epoch + 1) % 10 == 0:
+                print(f"Epoch {epoch + 1}/{epochs}, Average Loss: {avg_loss:.6f}")
+
+        return loss_history
+
 
 def main():
     """Main function to demonstrate backpropagation algorithm."""

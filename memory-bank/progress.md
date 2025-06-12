@@ -24,8 +24,8 @@ Do not write separate test files. Validate functionality with inline print state
 - [x] Implement gradient calculation for output layer using chain rule
 - [x] Implement gradient calculation for hidden layers propagating error backwards
 - [x] Validate gradients using numerical gradient checking
-- [ ] Calculate weight and bias gradients for all layers
-- [ ] Implement gradient descent parameter update function
+- [x] Calculate weight and bias gradients for all layers
+- [x] Implement gradient descent parameter update function
 
 ## Training and Demonstration
 
