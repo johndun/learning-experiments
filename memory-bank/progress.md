@@ -31,10 +31,8 @@ Do not write separate test files. Validate functionality with inline print state
 
 - [x] Generate XOR dataset directly in script for binary classification demo
 - [x] Create complete training loop with epoch management
-- [ ] Implement simple batch processing for training
-- [ ] Add training progress tracking (loss over epochs)
 
 ## Visualization and Output
 
-- [ ] Generate training loss convergence plot
+- [x] Generate training loss convergence plot
 - [ ] Create decision boundary visualization for 2D classification

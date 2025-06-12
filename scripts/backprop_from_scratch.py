@@ -18,6 +18,13 @@ import math
 import random
 from collections.abc import Callable
 
+try:
+    import matplotlib.pyplot as plt
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
+    print("Warning: matplotlib not available. Visualizations will be skipped.")
+
 
 # Basic Mathematical Functions
 def exp(x: float) -> float:
@@ -923,6 +930,55 @@ class NeuralNetwork:
         return loss_history
 
 
+def plot_training_loss(loss_history: list[float], save_path: str = "outputs/training_loss.png"):
+    """
+    Plot training loss convergence over epochs.
+
+    Args:
+        loss_history: List of loss values for each epoch
+        save_path: Path to save the plot
+    """
+    if not MATPLOTLIB_AVAILABLE:
+        print("Matplotlib not available. Skipping loss plot generation.")
+        return
+
+    plt.figure(figsize=(10, 6))
+    epochs = list(range(1, len(loss_history) + 1))
+
+    plt.plot(epochs, loss_history, 'b-', linewidth=2, label='Training Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Training Loss Convergence')
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+
+    # Set y-axis to start from 0 for better visualization
+    plt.ylim(bottom=0)
+
+    # Add text annotations for initial and final loss
+    if loss_history:
+        initial_loss = loss_history[0]
+        final_loss = loss_history[-1]
+        plt.text(0.02, 0.98, f'Initial Loss: {initial_loss:.6f}',
+                transform=plt.gca().transAxes, fontsize=10, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+        plt.text(0.02, 0.90, f'Final Loss: {final_loss:.6f}',
+                transform=plt.gca().transAxes, fontsize=10, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
+
+        # Calculate loss reduction percentage
+        if initial_loss > 0:
+            reduction_pct = ((initial_loss - final_loss) / initial_loss) * 100
+            plt.text(0.02, 0.82, f'Reduction: {reduction_pct:.1f}%',
+                    transform=plt.gca().transAxes, fontsize=10, verticalalignment='top',
+                    bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"Training loss plot saved to: {save_path}")
+    plt.close()
+
+
 def main():
     """Main function to demonstrate backpropagation algorithm."""
     print("Backpropagation from Scratch - Implementation Starting")
@@ -1274,6 +1330,19 @@ def main():
     else:
         print("📉 Network struggled to learn XOR. May need more training or different parameters.")
 
+    # Generate training loss convergence plot
+    print("\n" + "=" * 50)
+    print("GENERATING TRAINING LOSS CONVERGENCE PLOT")
+    print("=" * 50)
+
+    try:
+        plot_training_loss(loss_history, "outputs/backprop_training_loss.png")
+        print("✅ Training loss convergence plot generated successfully!")
+    except Exception as e:
+        print(f"❌ Failed to generate training loss plot: {e}")
+
+    print("=" * 50)
+
     # Training loop demonstration summary
     print("\n" + "=" * 50)
     print("TRAINING LOOP DEMONSTRATION COMPLETE")
@@ -1286,6 +1355,7 @@ def main():
     print("   • Performance evaluation on test data")
     print("   • Convergence analysis")
     print("   • Binary classification metrics")
+    print("   • Training loss visualization")
     print("=" * 50)
 
     print("Implementation complete with validated backpropagation!")
