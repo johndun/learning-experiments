@@ -16,6 +16,7 @@
     - Tests should be written using `pytest`.
     - Aim for high coverage, with coverage reports generated automatically during CI.
     - Tests should be isolated, repeatable, and cover all critical paths.
+    - For scripts, do not use `pytest`. Instead, include tests as print statements directly in the script file.
 
 ## Coding Guidelines
 

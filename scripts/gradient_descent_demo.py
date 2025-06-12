@@ -220,6 +220,11 @@ def main():
     print("=" * 40)
     print(f"PyTorch version: {torch.__version__}")
     print("Script initialized successfully!")
+    print()
+    print("Target Function:")
+    print("f(x) = (x - 3)² + 1")
+    print("Minimum at x = 3, f(3) = 1")
+    print("Gradient: df/dx = 2(x - 3)")
 
     # Create output directory
     output_dir = Path("outputs")

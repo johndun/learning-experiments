@@ -8,6 +8,7 @@
     ```
     uv run ruff check --fix && uv run ruff format && uv run pytest --cov
     ```
+- Use concise single sentence commit messages
 
 ## Memory Bank
 

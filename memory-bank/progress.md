@@ -36,7 +36,5 @@
 
 ## Testing and Documentation
 
-- [ ] Test gradient computation accuracy against analytical gradients
 - [ ] Test convergence properties with different learning rates
-- [ ] Test edge cases (zero learning rate, very large learning rate)
 - [ ] Add performance benchmarks comparing manual vs built-in optimizers
