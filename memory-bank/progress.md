@@ -8,7 +8,7 @@ Do not write separate test files. Validate functionality with inline print state
 ## Script Structure and Implementation
 
 - [x] Create main script file (`scripts/backprop_from_scratch.py`) containing all components
-- [ ] Implement basic matrix operations and mathematical functions from scratch
+- [x] Implement basic matrix operations and mathematical functions from scratch
 - [ ] Define activation functions (sigmoid, tanh, ReLU) and their derivatives inline
 - [ ] Implement loss functions (mean squared error) with derivatives
 
