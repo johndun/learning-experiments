@@ -493,6 +493,128 @@ class NeuralNetwork:
         """Get outputs from all layers (for debugging/visualization)."""
         return [layer.last_outputs[:] for layer in self.layers if layer.last_outputs is not None]
 
+    def backward(self, targets: List[float], loss_function: str = 'mse') -> Tuple[List[List[List[float]]], List[List[float]]]:
+        """
+        Backward pass (backpropagation) through the network.
+
+        Computes gradients for all weights and biases using chain rule.
+
+        Args:
+            targets: Target values for training
+            loss_function: Loss function to use ('mse' or 'binary_crossentropy')
+
+        Returns:
+            Tuple of (weight_gradients, bias_gradients) where:
+            - weight_gradients[layer][neuron][weight] = gradient for that weight
+            - bias_gradients[layer][neuron] = gradient for that bias
+        """
+        if not self.layers:
+            raise ValueError("Network has no layers")
+
+        # Get network predictions
+        predictions = self.layers[-1].last_outputs
+        if predictions is None:
+            raise ValueError("Must call forward() before backward()")
+
+        if len(predictions) != len(targets):
+            raise ValueError("Predictions and targets must have same length")
+
+        # Initialize gradient storage
+        weight_gradients = []
+        bias_gradients = []
+
+        for layer in self.layers:
+            layer_weight_grads = []
+            layer_bias_grads = []
+
+            for neuron in layer.neurons:
+                neuron_weight_grads = [0.0] * len(neuron.weights)
+                layer_weight_grads.append(neuron_weight_grads)
+                layer_bias_grads.append(0.0)
+
+            weight_gradients.append(layer_weight_grads)
+            bias_gradients.append(layer_bias_grads)
+
+        # Calculate output layer gradients using chain rule
+        output_layer_idx = len(self.layers) - 1
+        output_layer = self.layers[output_layer_idx]
+
+        # Step 1: Calculate dL/dOutput (derivative of loss w.r.t. network output)
+        if loss_function == 'mse':
+            loss_gradients = mse_derivative(predictions, targets)
+        elif loss_function == 'binary_crossentropy':
+            loss_gradients = bce_derivative(predictions, targets)
+        else:
+            raise ValueError(f"Unknown loss function: {loss_function}")
+
+        # Step 2: Calculate output layer gradients
+        output_deltas = self._calculate_output_layer_gradients(output_layer, loss_gradients)
+
+        # Step 3: Calculate weight and bias gradients for output layer
+        self._calculate_layer_weight_bias_gradients(
+            output_layer, output_deltas, output_layer_idx,
+            weight_gradients, bias_gradients
+        )
+
+        return weight_gradients, bias_gradients
+
+    def _calculate_output_layer_gradients(self, output_layer: Layer, loss_gradients: List[float]) -> List[float]:
+        """
+        Calculate gradients for output layer using chain rule.
+
+        For output layer: delta = dL/dOutput * dOutput/dWeightedSum
+
+        Args:
+            output_layer: The output layer
+            loss_gradients: Gradients of loss w.r.t. outputs
+
+        Returns:
+            List of delta values for each neuron in output layer
+        """
+        deltas = []
+
+        for i, neuron in enumerate(output_layer.neurons):
+            # dL/dOutput (from loss function)
+            loss_grad = loss_gradients[i]
+
+            # dOutput/dWeightedSum (activation function derivative)
+            activation_derivative = neuron.get_activation_derivative()
+
+            # Chain rule: dL/dWeightedSum = dL/dOutput * dOutput/dWeightedSum
+            delta = loss_grad * activation_derivative
+            deltas.append(delta)
+
+        return deltas
+
+    def _calculate_layer_weight_bias_gradients(self, layer: Layer, deltas: List[float],
+                                             layer_idx: int, weight_gradients: List[List[List[float]]],
+                                             bias_gradients: List[List[float]]):
+        """
+        Calculate weight and bias gradients for a layer given its deltas.
+
+        Weight gradient: dL/dWeight = delta * input_to_neuron
+        Bias gradient: dL/dBias = delta
+
+        Args:
+            layer: Layer to calculate gradients for
+            deltas: Delta values for each neuron in layer
+            layer_idx: Index of layer in network
+            weight_gradients: Storage for weight gradients (modified in place)
+            bias_gradients: Storage for bias gradients (modified in place)
+        """
+        for i, neuron in enumerate(layer.neurons):
+            delta = deltas[i]
+
+            # Bias gradient is just the delta
+            bias_gradients[layer_idx][i] = delta
+
+            # Weight gradients: delta * input to this neuron
+            if neuron.last_input is None:
+                raise ValueError("Neuron must have stored input from forward pass")
+
+            for j, input_val in enumerate(neuron.last_input):
+                weight_gradients[layer_idx][i][j] = delta * input_val
+
 
 def main():
     """Main function to demonstrate backpropagation algorithm."""
@@ -574,6 +696,39 @@ def main():
     print(f"Network forward pass: input={test_input}, output={network_output[0]:.4f}")
 
     print("Neural network data structures validated successfully!")
+    print("=" * 50)
+
+    # Test backpropagation gradients
+    print("Testing backpropagation gradients...")
+
+    # Create simple test case
+    simple_network = NeuralNetwork([2, 1], 'sigmoid')  # 2 inputs, 1 output
+    test_inputs = [0.5, -0.3]
+    test_targets = [1.0]
+
+    # Forward pass
+    prediction = simple_network.forward(test_inputs)
+    print(f"Forward pass: input={test_inputs}, prediction={prediction[0]:.4f}, target={test_targets[0]}")
+
+    # Backward pass
+    weight_grads, bias_grads = simple_network.backward(test_targets, 'mse')
+
+    print(f"Computed gradients successfully!")
+    print(f"Weight gradients shape: {len(weight_grads)} layers")
+    print(f"Layer 0 weight gradients: {len(weight_grads[0])} neurons, {len(weight_grads[0][0])} weights each")
+    print(f"First neuron weight gradients: {[f'{g:.4f}' for g in weight_grads[0][0]]}")
+    print(f"First neuron bias gradient: {bias_grads[0][0]:.4f}")
+
+    # Test with multi-layer network
+    print("\nTesting multi-layer network gradients...")
+    multi_network = NeuralNetwork([2, 3, 1], 'sigmoid')  # 2 inputs, 3 hidden, 1 output
+    multi_prediction = multi_network.forward(test_inputs)
+    multi_weight_grads, multi_bias_grads = multi_network.backward(test_targets, 'mse')
+
+    print(f"Multi-layer forward pass: prediction={multi_prediction[0]:.4f}")
+    print(f"Multi-layer gradients computed for {len(multi_weight_grads)} layers")
+
+    print("Backpropagation gradients validated successfully!")
     print("=" * 50)
 
     # TODO: Generate XOR dataset
