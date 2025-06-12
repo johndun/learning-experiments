@@ -12,10 +12,9 @@
 
 ## Memory Bank
 
-- Read the memory bank files in this order (skipping those not present):
-  - projectArchitecture.md
-  - currentContext.md
-  - progress.md
+- Read these memory bank files:
+  - memory-bank/projectArchitecture.md
+  - memory-bank/currentContext.md
 
 ## Implementation Plans
 
