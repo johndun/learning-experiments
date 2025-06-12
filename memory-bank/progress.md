@@ -2,7 +2,7 @@
 
 ## Core Implementation
 
-- [ ] Create basic script structure with PyTorch imports and setup
+- [x] Create basic script structure with PyTorch imports and setup
   - Set up project structure in `scripts/gradient_descent_demo.py`
   - Import required libraries (torch, matplotlib, numpy)
   - Add docstring explaining the purpose and approach
