@@ -71,6 +71,131 @@ def relu_derivative(x: float) -> float:
     return 1.0 if x > 0.0 else 0.0
 
 
+# Loss Functions
+def mean_squared_error(predictions: List[float], targets: List[float]) -> float:
+    """
+    Compute mean squared error loss.
+
+    MSE = (1/n) * Σ(predictions - targets)²
+
+    Args:
+        predictions: Model predictions
+        targets: True target values
+
+    Returns:
+        Mean squared error value
+    """
+    if len(predictions) != len(targets):
+        raise ValueError("Predictions and targets must have same length")
+
+    n = len(predictions)
+    if n == 0:
+        return 0.0
+
+    total_error = 0.0
+    for i in range(n):
+        error = predictions[i] - targets[i]
+        total_error += error * error
+
+    return total_error / n
+
+
+def mse_derivative(predictions: List[float], targets: List[float]) -> List[float]:
+    """
+    Compute derivative of mean squared error with respect to predictions.
+
+    d(MSE)/d(predictions) = (2/n) * (predictions - targets)
+
+    Args:
+        predictions: Model predictions
+        targets: True target values
+
+    Returns:
+        List of gradients with respect to each prediction
+    """
+    if len(predictions) != len(targets):
+        raise ValueError("Predictions and targets must have same length")
+
+    n = len(predictions)
+    if n == 0:
+        return []
+
+    gradients = []
+    for i in range(n):
+        gradient = (2.0 / n) * (predictions[i] - targets[i])
+        gradients.append(gradient)
+
+    return gradients
+
+
+def binary_cross_entropy(predictions: List[float], targets: List[float]) -> float:
+    """
+    Compute binary cross-entropy loss.
+
+    BCE = -(1/n) * Σ[targets * log(predictions) + (1-targets) * log(1-predictions)]
+
+    Args:
+        predictions: Model predictions (should be between 0 and 1)
+        targets: True target values (should be 0 or 1)
+
+    Returns:
+        Binary cross-entropy loss value
+    """
+    if len(predictions) != len(targets):
+        raise ValueError("Predictions and targets must have same length")
+
+    n = len(predictions)
+    if n == 0:
+        return 0.0
+
+    total_loss = 0.0
+    epsilon = 1e-15  # Small value to prevent log(0)
+
+    for i in range(n):
+        # Clip predictions to prevent log(0)
+        pred = max(epsilon, min(1.0 - epsilon, predictions[i]))
+        target = targets[i]
+
+        loss = -(target * math.log(pred) + (1.0 - target) * math.log(1.0 - pred))
+        total_loss += loss
+
+    return total_loss / n
+
+
+def bce_derivative(predictions: List[float], targets: List[float]) -> List[float]:
+    """
+    Compute derivative of binary cross-entropy with respect to predictions.
+
+    d(BCE)/d(predictions) = (1/n) * [(predictions - targets) / (predictions * (1 - predictions))]
+
+    Args:
+        predictions: Model predictions (should be between 0 and 1)
+        targets: True target values (should be 0 or 1)
+
+    Returns:
+        List of gradients with respect to each prediction
+    """
+    if len(predictions) != len(targets):
+        raise ValueError("Predictions and targets must have same length")
+
+    n = len(predictions)
+    if n == 0:
+        return []
+
+    gradients = []
+    epsilon = 1e-15  # Small value to prevent division by zero
+
+    for i in range(n):
+        # Clip predictions to prevent division by zero
+        pred = max(epsilon, min(1.0 - epsilon, predictions[i]))
+        target = targets[i]
+
+        gradient = (1.0 / n) * ((pred - target) / (pred * (1.0 - pred)))
+        gradients.append(gradient)
+
+    return gradients
+
+
 # Basic Matrix Operations
 class Matrix:
     """Simple matrix implementation for neural network operations."""
@@ -216,6 +341,21 @@ def main():
     v2 = [4.0, 5.0, 6.0]
     print(f"\nVector dot product: {dot_product(v1, v2)}")
     print(f"Vector addition: {vector_add(v1, v2)}")
+
+    # Test loss functions
+    print(f"\nTesting loss functions:")
+    predictions = [0.8, 0.3, 0.9, 0.1]
+    targets = [1.0, 0.0, 1.0, 0.0]
+
+    mse_loss = mean_squared_error(predictions, targets)
+    mse_grad = mse_derivative(predictions, targets)
+    print(f"MSE loss: {mse_loss:.4f}")
+    print(f"MSE gradients: {[f'{g:.4f}' for g in mse_grad]}")
+
+    bce_loss = binary_cross_entropy(predictions, targets)
+    bce_grad = bce_derivative(predictions, targets)
+    print(f"BCE loss: {bce_loss:.4f}")
+    print(f"BCE gradients: {[f'{g:.4f}' for g in bce_grad]}")
 
     print("\nBasic operations validated successfully!")
     print("=" * 50)
