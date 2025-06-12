@@ -209,25 +209,6 @@ def dot_product(a: list[float], b: list[float]) -> float:
     return sum(a[i] * b[i] for i in range(len(a)))
 
 
-def vector_add(a: list[float], b: list[float]) -> list[float]:
-    """Add two vectors element-wise."""
-    if len(a) != len(b):
-        raise ValueError("Vectors must have same length")
-    return [a[i] + b[i] for i in range(len(a))]
-
-
-def vector_subtract(a: list[float], b: list[float]) -> list[float]:
-    """Subtract two vectors element-wise."""
-    if len(a) != len(b):
-        raise ValueError("Vectors must have same length")
-    return [a[i] - b[i] for i in range(len(a))]
-
-
-def vector_scalar_multiply(vector: list[float], scalar: float) -> list[float]:
-    """Multiply vector by scalar."""
-    return [x * scalar for x in vector]
-
-
 # Neural Network Data Structures
 class Neuron:
     """Simple neuron implementation with weights and bias."""
@@ -1025,7 +1006,6 @@ def main():
     v1 = [1.0, 2.0, 3.0]
     v2 = [4.0, 5.0, 6.0]
     print(f"\nVector dot product: {dot_product(v1, v2)}")
-    print(f"Vector addition: {vector_add(v1, v2)}")
 
     # Test loss functions
     print("\nTesting loss functions:")
