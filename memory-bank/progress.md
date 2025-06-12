@@ -35,4 +35,4 @@ Do not write separate test files. Validate functionality with inline print state
 ## Visualization and Output
 
 - [x] Generate training loss convergence plot
-- [ ] Create decision boundary visualization for 2D classification
+- [x] Create decision boundary visualization for 2D classification

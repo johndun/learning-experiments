@@ -979,6 +979,123 @@ def plot_training_loss(loss_history: list[float], save_path: str = "outputs/trai
     plt.close()
 
 
+def plot_decision_boundary(
+    network: NeuralNetwork,
+    training_data: list[tuple[list[float], list[float]]],
+    save_path: str = "outputs/decision_boundary.png",
+    resolution: int = 100
+):
+    """
+    Plot decision boundary for 2D binary classification.
+
+    Creates a visualization showing how the trained neural network classifies
+    different points in the 2D input space. The background shows the decision
+    boundary (where the network output changes from 0 to 1), and the training
+    data points are overlaid with their true labels.
+
+    Args:
+        network: Trained neural network
+        training_data: List of (inputs, targets) tuples for training data
+        save_path: Path to save the plot
+        resolution: Number of points per axis for the grid (higher = smoother)
+    """
+    if not MATPLOTLIB_AVAILABLE:
+        print("Matplotlib not available. Skipping decision boundary plot generation.")
+        return
+
+    # Extract training inputs and targets
+    inputs_list = [inputs for inputs, _ in training_data]
+    targets_list = [targets[0] for _, targets in training_data]  # Assuming single output
+
+    # Create a grid of points to evaluate the network on
+    x_min, x_max = -0.5, 1.5  # Expand beyond [0,1] to show boundary clearly
+    y_min, y_max = -0.5, 1.5
+
+    # Create meshgrid
+    x_range = []
+    y_range = []
+    for i in range(resolution):
+        x_val = x_min + (x_max - x_min) * i / (resolution - 1)
+        y_val = y_min + (y_max - y_min) * i / (resolution - 1)
+        x_range.append(x_val)
+        y_range.append(y_val)
+
+    # Evaluate network on grid points
+    grid_predictions = []
+    for y_val in y_range:
+        row_predictions = []
+        for x_val in x_range:
+            prediction = network.forward([x_val, y_val])
+            row_predictions.append(prediction[0])
+        grid_predictions.append(row_predictions)
+
+    # Create the plot
+    plt.figure(figsize=(10, 8))
+
+    # Create contour plot for decision boundary
+    X, Y = [], []
+    for i in range(resolution):
+        X.append(x_range)
+        Y.append([y_range[i]] * resolution)
+
+    # Plot decision boundary using contour
+    contour = plt.contourf(x_range, y_range, grid_predictions,
+                          levels=50, alpha=0.6, cmap='RdYlBu')
+    plt.colorbar(contour, label='Network Output')
+
+    # Add decision boundary line (where output = 0.5)
+    plt.contour(x_range, y_range, grid_predictions,
+               levels=[0.5], colors='black', linewidths=2, linestyles='--')
+
+    # Plot training data points
+    for i, (inputs, target) in enumerate(zip(inputs_list, targets_list)):
+        x, y = inputs[0], inputs[1]
+        if target == 0:
+            plt.scatter(x, y, c='blue', s=200, marker='o',
+                       edgecolors='black', linewidth=2, label='Class 0' if i == 0 else "")
+        else:
+            plt.scatter(x, y, c='red', s=200, marker='s',
+                       edgecolors='black', linewidth=2, label='Class 1' if i == 1 else "")
+
+    # Add labels and annotations for each training point
+    labels = ['(0,0)', '(0,1)', '(1,0)', '(1,1)']
+    for i, (inputs, target) in enumerate(zip(inputs_list, targets_list)):
+        x, y = inputs[0], inputs[1]
+        plt.annotate(labels[i], (x, y), xytext=(5, 5), textcoords='offset points',
+                    fontsize=10, fontweight='bold',
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
+
+    # Set plot properties
+    plt.xlim(x_min, x_max)
+    plt.ylim(y_min, y_max)
+    plt.xlabel('Input 1', fontsize=12)
+    plt.ylabel('Input 2', fontsize=12)
+    plt.title('Decision Boundary Visualization for XOR Classification', fontsize=14, fontweight='bold')
+    plt.grid(True, alpha=0.3)
+    plt.legend(loc='upper right')
+
+    # Add text box with network info
+    info_text = f"Network Architecture: {network.num_layers} layers\n"
+    info_text += f"Hidden Neurons: {len(network.layers[0].neurons)}\n"
+    info_text += f"Activation: {network.layers[0].neurons[0].activation_func}"
+    plt.text(0.02, 0.98, info_text, transform=plt.gca().transAxes,
+            fontsize=10, verticalalignment='top',
+            bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+    # Add explanation text
+    explanation = "Decision Boundary (dashed line): Where network output = 0.5\n"
+    explanation += "Blue regions: Network predicts Class 0\n"
+    explanation += "Red regions: Network predicts Class 1"
+    plt.text(0.02, 0.15, explanation, transform=plt.gca().transAxes,
+            fontsize=9, verticalalignment='top',
+            bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"Decision boundary plot saved to: {save_path}")
+    plt.close()
+
+
 def main():
     """Main function to demonstrate backpropagation algorithm."""
     print("Backpropagation from Scratch - Implementation Starting")
@@ -1340,6 +1457,19 @@ def main():
         print("✅ Training loss convergence plot generated successfully!")
     except Exception as e:
         print(f"❌ Failed to generate training loss plot: {e}")
+
+    print("=" * 50)
+
+    # Generate decision boundary visualization
+    print("\n" + "=" * 50)
+    print("GENERATING DECISION BOUNDARY VISUALIZATION")
+    print("=" * 50)
+
+    try:
+        plot_decision_boundary(training_network, xor_dataset, "outputs/backprop_decision_boundary.png")
+        print("✅ Decision boundary visualization generated successfully!")
+    except Exception as e:
+        print(f"❌ Failed to generate decision boundary plot: {e}")
 
     print("=" * 50)
 
