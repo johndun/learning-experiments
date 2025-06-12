@@ -1,0 +1,2 @@
+- training.epochs=1
+- data.subset.ratio=0.02

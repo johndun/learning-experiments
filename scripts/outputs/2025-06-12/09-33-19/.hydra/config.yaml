@@ -1,0 +1,94 @@
+model:
+  name: lenet5
+  input_channels: 1
+  num_classes: 10
+  conv1:
+    out_channels: 6
+    kernel_size: 5
+    padding: 0
+  conv2:
+    out_channels: 16
+    kernel_size: 5
+    padding: 0
+  pooling:
+    kernel_size: 2
+    stride: 2
+  fc1:
+    out_features: 120
+  fc2:
+    out_features: 84
+  weight_init:
+    method: xavier_uniform
+    bias_init: zeros
+  compile:
+    enabled: false
+    mode: default
+training:
+  epochs: 3
+  batch_size: 128
+  learning_rate: 0.02
+  momentum: 0.9
+  optimizer:
+    name: sgd
+    weight_decay: 0.0
+    nesterov: false
+  criterion: nll_loss
+  lr_scheduler:
+    enabled: false
+    name: step_lr
+    step_size: 30
+    gamma: 0.1
+  performance:
+    precision: 16-mixed
+    compile_model: true
+    gradient_clip_val: null
+    accumulate_grad_batches: 1
+  early_stopping:
+    enabled: false
+    monitor: test_loss
+    patience: 10
+    min_delta: 0.001
+  checkpointing:
+    enabled: false
+    save_top_k: 1
+    monitor: test_accuracy
+    mode: max
+data:
+  name: mnist
+  root: ./data
+  download: true
+  transforms:
+    normalize:
+      mean:
+      - 0.1307
+      std:
+      - 0.3081
+    to_tensor: true
+  batch_size: 64
+  num_workers: 0
+  pin_memory: false
+  subset:
+    enabled: true
+    ratio: 0.1
+    shuffle: true
+  splits:
+    train: true
+    test: true
+    val: false
+seed: 42
+output_dir: outputs
+experiment_name: lenet_mnist_fabric
+visualizations:
+  enabled: true
+  save_training_curves: true
+  save_sample_predictions: true
+  save_feature_maps: true
+  num_prediction_samples: 16
+compare_methods:
+  enabled: false
+  methods:
+  - standard
+  - compiled
+logging:
+  level: INFO
+  log_every_n_batches: 10

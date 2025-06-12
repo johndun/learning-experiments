@@ -1,0 +1,16 @@
+# Fast Training Configuration for Quick Iteration
+
+# @package _global_
+defaults:
+  - default
+
+# Override for fast training
+epochs: 3
+batch_size: 128
+learning_rate: 0.02
+
+# Performance optimizations for speed
+performance:
+  precision: "32-true"  # Keep full precision for compatibility
+  compile_model: false  # Disable compile to avoid MPS compatibility issues
+  accumulate_grad_batches: 1

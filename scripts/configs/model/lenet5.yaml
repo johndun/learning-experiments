@@ -1,0 +1,38 @@
+# LeNet-5 Model Configuration
+
+# Architecture parameters
+name: lenet5
+input_channels: 1
+num_classes: 10
+
+# Layer specifications
+conv1:
+  out_channels: 6
+  kernel_size: 5
+  padding: 0
+
+conv2:
+  out_channels: 16
+  kernel_size: 5
+  padding: 0
+
+pooling:
+  kernel_size: 2
+  stride: 2
+
+# Fully connected layers
+fc1:
+  out_features: 120
+
+fc2:
+  out_features: 84
+
+# Weight initialization
+weight_init:
+  method: xavier_uniform
+  bias_init: zeros
+
+# Model compilation
+compile:
+  enabled: false  # Set to true to use torch.compile
+  mode: default   # Options: default, reduce-overhead, max-autotune

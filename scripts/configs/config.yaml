@@ -1,0 +1,31 @@
+# Main configuration for LeNet-5 MNIST training with Lightning Fabric + Hydra
+# Override sections via CLI: python script.py training=fast model=lenet5_small
+
+defaults:
+  - model: lenet5
+  - training: default
+  - data: mnist
+  - _self_
+
+# Global settings
+seed: 42
+output_dir: outputs
+experiment_name: lenet_mnist_fabric
+
+# Visualization settings
+visualizations:
+  enabled: true
+  save_training_curves: true
+  save_sample_predictions: true
+  save_feature_maps: true
+  num_prediction_samples: 16
+
+# Performance comparison settings
+compare_methods:
+  enabled: false  # Set to true to compare standard vs compiled models
+  methods: ["standard", "compiled"]
+
+# Logging
+logging:
+  level: INFO
+  log_every_n_batches: 10
