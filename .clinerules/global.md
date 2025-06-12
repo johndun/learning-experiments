@@ -1,3 +1,7 @@
+## Writing Rules
+
+- Write concisely; omit needless modifiers and embellishments.
+
 ## Git
 
 - Before commiting, run code checks and tests:
