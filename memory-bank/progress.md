@@ -8,7 +8,7 @@
   - Add docstring explaining the purpose and approach
   - Test: Verify script runs without errors and imports work correctly
 
-- [ ] Implement target function to optimize
+- [x] Implement target function to optimize
   - Create a simple quadratic function `f(x) = (x - 3)^2 + 1` to minimize
   - Add function to compute analytical gradient `df/dx = 2(x - 3)`
   - Include visualization helper to plot the function
