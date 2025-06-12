@@ -14,7 +14,7 @@
   - Include visualization helper to plot the function
   - Test: Verify function evaluation and gradient computation match expected values
 
-- [ ] Implement manual gradient descent algorithm
+- [x] Implement manual gradient descent algorithm
   - Create `gradient_descent()` function with parameters (learning_rate, num_iterations)
   - Use PyTorch tensors for parameter tracking with `requires_grad=True`
   - Implement manual gradient computation using automatic differentiation
