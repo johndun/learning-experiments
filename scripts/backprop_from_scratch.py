@@ -25,7 +25,7 @@ def exp(x: float) -> float:
     try:
         return math.exp(x)
     except OverflowError:
-        return float('inf') if x > 0 else 0.0
+        return float("inf") if x > 0 else 0.0
 
 
 def sigmoid(x: float) -> float:
@@ -214,12 +214,12 @@ class Matrix:
         row, col = key
         self.data[row][col] = value
 
-    def transpose(self) -> 'Matrix':
+    def transpose(self) -> "Matrix":
         """Return transpose of matrix."""
         transposed = [[self.data[j][i] for j in range(self.rows)] for i in range(self.cols)]
         return Matrix(transposed)
 
-    def multiply(self, other: 'Matrix') -> 'Matrix':
+    def multiply(self, other: "Matrix") -> "Matrix":
         """Matrix multiplication."""
         if self.cols != other.rows:
             raise ValueError(
@@ -235,34 +235,34 @@ class Matrix:
 
         return Matrix(result)
 
-    def add(self, other: 'Matrix') -> 'Matrix':
+    def add(self, other: "Matrix") -> "Matrix":
         """Element-wise addition."""
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError("Matrices must have same dimensions for addition")
 
-        result = [[self.data[i][j] + other.data[i][j] for j in range(self.cols)]
-                  for i in range(self.rows)]
+        result = [
+            [self.data[i][j] + other.data[i][j] for j in range(self.cols)] for i in range(self.rows)
+        ]
         return Matrix(result)
 
-    def subtract(self, other: 'Matrix') -> 'Matrix':
+    def subtract(self, other: "Matrix") -> "Matrix":
         """Element-wise subtraction."""
         if self.rows != other.rows or self.cols != other.cols:
             raise ValueError("Matrices must have same dimensions for subtraction")
 
-        result = [[self.data[i][j] - other.data[i][j] for j in range(self.cols)]
-                  for i in range(self.rows)]
+        result = [
+            [self.data[i][j] - other.data[i][j] for j in range(self.cols)] for i in range(self.rows)
+        ]
         return Matrix(result)
 
-    def scalar_multiply(self, scalar: float) -> 'Matrix':
+    def scalar_multiply(self, scalar: float) -> "Matrix":
         """Multiply all elements by scalar."""
-        result = [[self.data[i][j] * scalar for j in range(self.cols)]
-                  for i in range(self.rows)]
+        result = [[self.data[i][j] * scalar for j in range(self.cols)] for i in range(self.rows)]
         return Matrix(result)
 
-    def apply_function(self, func: Callable[[float], float]) -> 'Matrix':
+    def apply_function(self, func: Callable[[float], float]) -> "Matrix":
         """Apply function to all elements."""
-        result = [[func(self.data[i][j]) for j in range(self.cols)]
-                  for i in range(self.rows)]
+        result = [[func(self.data[i][j]) for j in range(self.cols)] for i in range(self.rows)]
         return Matrix(result)
 
     def to_list(self) -> list[list[float]]:
@@ -271,7 +271,7 @@ class Matrix:
 
     def __str__(self) -> str:
         """String representation of matrix."""
-        return '\n'.join(['\t'.join([f'{val:.4f}' for val in row]) for row in self.data])
+        return "\n".join(["\t".join([f"{val:.4f}" for val in row]) for row in self.data])
 
 
 # Vector Operations
@@ -305,7 +305,7 @@ def vector_scalar_multiply(vector: list[float], scalar: float) -> list[float]:
 class Neuron:
     """Simple neuron implementation with weights and bias."""
 
-    def __init__(self, num_inputs: int, activation_func: str = 'sigmoid'):
+    def __init__(self, num_inputs: int, activation_func: str = "sigmoid"):
         """
         Initialize neuron with random weights and bias.
 
@@ -344,11 +344,11 @@ class Neuron:
         self.last_weighted_sum = weighted_sum
 
         # Apply activation function
-        if self.activation_func == 'sigmoid':
+        if self.activation_func == "sigmoid":
             output = sigmoid(weighted_sum)
-        elif self.activation_func == 'tanh':
+        elif self.activation_func == "tanh":
             output = tanh(weighted_sum)
-        elif self.activation_func == 'relu':
+        elif self.activation_func == "relu":
             output = relu(weighted_sum)
         else:
             raise ValueError(f"Unknown activation function: {self.activation_func}")
@@ -361,11 +361,11 @@ class Neuron:
         if self.last_weighted_sum is None:
             raise ValueError("Must call forward() before getting derivative")
 
-        if self.activation_func == 'sigmoid':
+        if self.activation_func == "sigmoid":
             return sigmoid_derivative(self.last_weighted_sum)
-        elif self.activation_func == 'tanh':
+        elif self.activation_func == "tanh":
             return tanh_derivative(self.last_weighted_sum)
-        elif self.activation_func == 'relu':
+        elif self.activation_func == "relu":
             return relu_derivative(self.last_weighted_sum)
         else:
             raise ValueError(f"Unknown activation function: {self.activation_func}")
@@ -374,7 +374,7 @@ class Neuron:
 class Layer:
     """Simple layer implementation containing multiple neurons."""
 
-    def __init__(self, num_neurons: int, num_inputs: int, activation_func: str = 'sigmoid'):
+    def __init__(self, num_neurons: int, num_inputs: int, activation_func: str = "sigmoid"):
         """
         Initialize layer with specified number of neurons.
 
@@ -446,7 +446,7 @@ class Layer:
 class NeuralNetwork:
     """Simple feedforward neural network implementation."""
 
-    def __init__(self, layer_sizes: list[int], activation_func: str = 'sigmoid'):
+    def __init__(self, layer_sizes: list[int], activation_func: str = "sigmoid"):
         """
         Initialize neural network with specified architecture.
 
@@ -467,7 +467,7 @@ class NeuralNetwork:
             num_neurons = layer_sizes[i + 1]
 
             # Use sigmoid for output layer in binary classification
-            layer_activation = 'sigmoid' if i == self.num_layers - 1 else activation_func
+            layer_activation = "sigmoid" if i == self.num_layers - 1 else activation_func
             layer = Layer(num_neurons, num_inputs, layer_activation)
             self.layers.append(layer)
 
@@ -494,7 +494,7 @@ class NeuralNetwork:
         return [layer.last_outputs[:] for layer in self.layers if layer.last_outputs is not None]
 
     def backward(
-        self, targets: list[float], loss_function: str = 'mse'
+        self, targets: list[float], loss_function: str = "mse"
     ) -> tuple[list[list[list[float]]], list[list[float]]]:
         """
         Backward pass (backpropagation) through the network.
@@ -543,9 +543,9 @@ class NeuralNetwork:
         output_layer = self.layers[output_layer_idx]
 
         # Step 1: Calculate dL/dOutput (derivative of loss w.r.t. network output)
-        if loss_function == 'mse':
+        if loss_function == "mse":
             loss_gradients = mse_derivative(predictions, targets)
-        elif loss_function == 'binary_crossentropy':
+        elif loss_function == "binary_crossentropy":
             loss_gradients = bce_derivative(predictions, targets)
         else:
             raise ValueError(f"Unknown loss function: {loss_function}")
@@ -555,8 +555,7 @@ class NeuralNetwork:
 
         # Step 3: Calculate weight and bias gradients for output layer
         self._calculate_layer_weight_bias_gradients(
-            output_layer, current_deltas, output_layer_idx,
-            weight_gradients, bias_gradients
+            output_layer, current_deltas, output_layer_idx, weight_gradients, bias_gradients
         )
 
         # Step 4: Propagate gradients backward through hidden layers
@@ -571,8 +570,7 @@ class NeuralNetwork:
 
             # Calculate weight and bias gradients for current layer
             self._calculate_layer_weight_bias_gradients(
-                current_layer, current_deltas, layer_idx,
-                weight_gradients, bias_gradients
+                current_layer, current_deltas, layer_idx, weight_gradients, bias_gradients
             )
 
         return weight_gradients, bias_gradients
@@ -607,8 +605,9 @@ class NeuralNetwork:
 
         return deltas
 
-    def _calculate_hidden_layer_gradients(self, current_layer: Layer, next_layer: Layer,
-                                        next_deltas: list[float]) -> list[float]:
+    def _calculate_hidden_layer_gradients(
+        self, current_layer: Layer, next_layer: Layer, next_deltas: list[float]
+    ) -> list[float]:
         """
         Calculate gradients for hidden layer using chain rule.
 
@@ -645,8 +644,12 @@ class NeuralNetwork:
         return deltas
 
     def _calculate_layer_weight_bias_gradients(
-        self, layer: Layer, deltas: list[float], layer_idx: int,
-        weight_gradients: list[list[list[float]]], bias_gradients: list[list[float]]
+        self,
+        layer: Layer,
+        deltas: list[float],
+        layer_idx: int,
+        weight_gradients: list[list[list[float]]],
+        bias_gradients: list[list[float]],
     ):
         """
         Calculate weight and bias gradients for a layer given its deltas.
@@ -675,8 +678,11 @@ class NeuralNetwork:
                 weight_gradients[layer_idx][i][j] = delta * input_val
 
     def numerical_gradient_check(
-        self, inputs: list[float], targets: list[float],
-        loss_function: str = 'mse', epsilon: float = 1e-5
+        self,
+        inputs: list[float],
+        targets: list[float],
+        loss_function: str = "mse",
+        epsilon: float = 1e-5,
     ) -> tuple[float, float]:
         """
         Validate analytical gradients using numerical gradient checking.
@@ -709,7 +715,6 @@ class NeuralNetwork:
         for layer_idx, layer in enumerate(self.layers):
             for neuron_idx, neuron in enumerate(layer.neurons):
                 for weight_idx in range(len(neuron.weights)):
-
                     # Compute numerical gradient for this weight
                     original_weight = neuron.weights[weight_idx]
 
@@ -718,9 +723,9 @@ class NeuralNetwork:
                     self.forward(inputs)
                     predictions_plus = self.layers[-1].last_outputs[:]
 
-                    if loss_function == 'mse':
+                    if loss_function == "mse":
                         loss_plus = mean_squared_error(predictions_plus, targets)
-                    elif loss_function == 'binary_crossentropy':
+                    elif loss_function == "binary_crossentropy":
                         loss_plus = binary_cross_entropy(predictions_plus, targets)
                     else:
                         raise ValueError(f"Unknown loss function: {loss_function}")
@@ -730,9 +735,9 @@ class NeuralNetwork:
                     self.forward(inputs)
                     predictions_minus = self.layers[-1].last_outputs[:]
 
-                    if loss_function == 'mse':
+                    if loss_function == "mse":
                         loss_minus = mean_squared_error(predictions_minus, targets)
-                    elif loss_function == 'binary_crossentropy':
+                    elif loss_function == "binary_crossentropy":
                         loss_minus = binary_cross_entropy(predictions_minus, targets)
                     else:
                         raise ValueError(f"Unknown loss function: {loss_function}")
@@ -759,7 +764,6 @@ class NeuralNetwork:
         # Check bias gradients
         for layer_idx, layer in enumerate(self.layers):
             for neuron_idx, neuron in enumerate(layer.neurons):
-
                 # Compute numerical gradient for this bias
                 original_bias = neuron.bias
 
@@ -768,9 +772,9 @@ class NeuralNetwork:
                 self.forward(inputs)
                 predictions_plus = self.layers[-1].last_outputs[:]
 
-                if loss_function == 'mse':
+                if loss_function == "mse":
                     loss_plus = mean_squared_error(predictions_plus, targets)
-                elif loss_function == 'binary_crossentropy':
+                elif loss_function == "binary_crossentropy":
                     loss_plus = binary_cross_entropy(predictions_plus, targets)
                 else:
                     raise ValueError(f"Unknown loss function: {loss_function}")
@@ -780,9 +784,9 @@ class NeuralNetwork:
                 self.forward(inputs)
                 predictions_minus = self.layers[-1].last_outputs[:]
 
-                if loss_function == 'mse':
+                if loss_function == "mse":
                     loss_minus = mean_squared_error(predictions_minus, targets)
-                elif loss_function == 'binary_crossentropy':
+                elif loss_function == "binary_crossentropy":
                     loss_minus = binary_cross_entropy(predictions_minus, targets)
                 else:
                     raise ValueError(f"Unknown loss function: {loss_function}")
@@ -806,8 +810,12 @@ class NeuralNetwork:
 
         return max_weight_error, max_bias_error
 
-    def update_parameters(self, weight_gradients: list[list[list[float]]],
-                         bias_gradients: list[list[float]], learning_rate: float):
+    def update_parameters(
+        self,
+        weight_gradients: list[list[list[float]]],
+        bias_gradients: list[list[float]],
+        learning_rate: float,
+    ):
         """
         Update all network parameters using gradient descent.
 
@@ -821,18 +829,27 @@ class NeuralNetwork:
             learning_rate: Learning rate for gradient descent step size
         """
         if len(weight_gradients) != len(self.layers):
-            raise ValueError(f"Expected {len(self.layers)} layers of weight gradients, got {len(weight_gradients)}")
+            raise ValueError(
+                f"Expected {len(self.layers)} layers of weight gradients, got {len(weight_gradients)}"
+            )
 
         if len(bias_gradients) != len(self.layers):
-            raise ValueError(f"Expected {len(self.layers)} layers of bias gradients, got {len(bias_gradients)}")
+            raise ValueError(
+                f"Expected {len(self.layers)} layers of bias gradients, got {len(bias_gradients)}"
+            )
 
         # Update parameters for each layer
         for layer_idx, layer in enumerate(self.layers):
             layer.update_weights(weight_gradients[layer_idx], learning_rate)
             layer.update_biases(bias_gradients[layer_idx], learning_rate)
 
-    def train_step(self, inputs: list[float], targets: list[float], learning_rate: float = 0.1,
-                   loss_function: str = 'mse') -> float:
+    def train_step(
+        self,
+        inputs: list[float],
+        targets: list[float],
+        learning_rate: float = 0.1,
+        loss_function: str = "mse",
+    ) -> float:
         """
         Perform one training step: forward pass, backward pass, and parameter update.
 
@@ -849,9 +866,9 @@ class NeuralNetwork:
         predictions = self.forward(inputs)
 
         # Calculate loss
-        if loss_function == 'mse':
+        if loss_function == "mse":
             loss = mean_squared_error(predictions, targets)
-        elif loss_function == 'binary_crossentropy':
+        elif loss_function == "binary_crossentropy":
             loss = binary_cross_entropy(predictions, targets)
         else:
             raise ValueError(f"Unknown loss function: {loss_function}")
@@ -864,8 +881,14 @@ class NeuralNetwork:
 
         return loss
 
-    def train(self, training_data: list[tuple[list[float], list[float]]], epochs: int = 100,
-              learning_rate: float = 0.1, loss_function: str = 'mse', verbose: bool = True) -> list[float]:
+    def train(
+        self,
+        training_data: list[tuple[list[float], list[float]]],
+        epochs: int = 100,
+        learning_rate: float = 0.1,
+        loss_function: str = "mse",
+        verbose: bool = True,
+    ) -> list[float]:
         """
         Train the network on a dataset for multiple epochs.
 
@@ -963,19 +986,19 @@ def main():
     print("Testing neural network data structures...")
 
     # Test single neuron
-    neuron = Neuron(2, 'sigmoid')
+    neuron = Neuron(2, "sigmoid")
     test_input = [0.5, -0.3]
     output = neuron.forward(test_input)
     print(f"Neuron forward pass: input={test_input}, output={output:.4f}")
     print(f"Activation derivative: {neuron.get_activation_derivative():.4f}")
 
     # Test layer
-    layer = Layer(3, 2, 'sigmoid')  # 3 neurons, 2 inputs each
+    layer = Layer(3, 2, "sigmoid")  # 3 neurons, 2 inputs each
     layer_output = layer.forward(test_input)
     print(f"Layer forward pass: input={test_input}, output={[f'{x:.4f}' for x in layer_output]}")
 
     # Test full network
-    network = NeuralNetwork([2, 4, 1], 'sigmoid')  # 2 inputs, 4 hidden, 1 output
+    network = NeuralNetwork([2, 4, 1], "sigmoid")  # 2 inputs, 4 hidden, 1 output
     network_output = network.forward(test_input)
     print(f"Network forward pass: input={test_input}, output={network_output[0]:.4f}")
 
@@ -986,28 +1009,32 @@ def main():
     print("Testing backpropagation gradients...")
 
     # Create simple test case
-    simple_network = NeuralNetwork([2, 1], 'sigmoid')  # 2 inputs, 1 output
+    simple_network = NeuralNetwork([2, 1], "sigmoid")  # 2 inputs, 1 output
     test_inputs = [0.5, -0.3]
     test_targets = [1.0]
 
     # Forward pass
     prediction = simple_network.forward(test_inputs)
-    print(f"Forward pass: input={test_inputs}, prediction={prediction[0]:.4f}, target={test_targets[0]}")
+    print(
+        f"Forward pass: input={test_inputs}, prediction={prediction[0]:.4f}, target={test_targets[0]}"
+    )
 
     # Backward pass
-    weight_grads, bias_grads = simple_network.backward(test_targets, 'mse')
+    weight_grads, bias_grads = simple_network.backward(test_targets, "mse")
 
     print("Computed gradients successfully!")
     print(f"Weight gradients shape: {len(weight_grads)} layers")
-    print(f"Layer 0 weight gradients: {len(weight_grads[0])} neurons, {len(weight_grads[0][0])} weights each")
+    print(
+        f"Layer 0 weight gradients: {len(weight_grads[0])} neurons, {len(weight_grads[0][0])} weights each"
+    )
     print(f"First neuron weight gradients: {[f'{g:.4f}' for g in weight_grads[0][0]]}")
     print(f"First neuron bias gradient: {bias_grads[0][0]:.4f}")
 
     # Test with multi-layer network
     print("\nTesting multi-layer network gradients...")
-    multi_network = NeuralNetwork([2, 3, 1], 'sigmoid')  # 2 inputs, 3 hidden, 1 output
+    multi_network = NeuralNetwork([2, 3, 1], "sigmoid")  # 2 inputs, 3 hidden, 1 output
     multi_prediction = multi_network.forward(test_inputs)
-    multi_weight_grads, multi_bias_grads = multi_network.backward(test_targets, 'mse')
+    multi_weight_grads, multi_bias_grads = multi_network.backward(test_targets, "mse")
 
     print(f"Multi-layer forward pass: prediction={multi_prediction[0]:.4f}")
     print(f"Multi-layer gradients computed for {len(multi_weight_grads)} layers")
@@ -1020,12 +1047,12 @@ def main():
 
     # Test with simple network
     print("\nTesting simple network (2 inputs, 1 output):")
-    gradient_network = NeuralNetwork([2, 1], 'sigmoid')
+    gradient_network = NeuralNetwork([2, 1], "sigmoid")
     test_inputs = [0.5, -0.3]
     test_targets = [1.0]
 
     max_weight_error, max_bias_error = gradient_network.numerical_gradient_check(
-        test_inputs, test_targets, 'mse', epsilon=1e-5
+        test_inputs, test_targets, "mse", epsilon=1e-5
     )
 
     print("\nGradient Check Results:")
@@ -1041,10 +1068,10 @@ def main():
 
     # Test with multi-layer network
     print("\nTesting multi-layer network (2 inputs, 3 hidden, 1 output):")
-    complex_network = NeuralNetwork([2, 3, 1], 'sigmoid')
+    complex_network = NeuralNetwork([2, 3, 1], "sigmoid")
 
     max_weight_error_complex, max_bias_error_complex = complex_network.numerical_gradient_check(
-        test_inputs, test_targets, 'mse', epsilon=1e-5
+        test_inputs, test_targets, "mse", epsilon=1e-5
     )
 
     print("\nComplex Network Gradient Check Results:")
@@ -1058,10 +1085,10 @@ def main():
 
     # Test with binary cross-entropy loss
     print("\nTesting with binary cross-entropy loss:")
-    bce_network = NeuralNetwork([2, 1], 'sigmoid')
+    bce_network = NeuralNetwork([2, 1], "sigmoid")
 
     max_weight_error_bce, max_bias_error_bce = bce_network.numerical_gradient_check(
-        test_inputs, test_targets, 'binary_crossentropy', epsilon=1e-5
+        test_inputs, test_targets, "binary_crossentropy", epsilon=1e-5
     )
 
     print("\nBCE Gradient Check Results:")
@@ -1097,7 +1124,7 @@ def main():
             ([0.0, 0.0], [0.0]),  # 0 XOR 0 = 0
             ([0.0, 1.0], [1.0]),  # 0 XOR 1 = 1
             ([1.0, 0.0], [1.0]),  # 1 XOR 0 = 1
-            ([1.0, 1.0], [0.0])   # 1 XOR 1 = 0
+            ([1.0, 1.0], [0.0]),  # 1 XOR 1 = 0
         ]
         return xor_data
 
@@ -1112,7 +1139,7 @@ def main():
 
     # Test network on XOR dataset before training
     print("\nTesting untrained network on XOR dataset:")
-    xor_network = NeuralNetwork([2, 4, 1], 'sigmoid')  # 2 inputs, 4 hidden neurons, 1 output
+    xor_network = NeuralNetwork([2, 4, 1], "sigmoid")  # 2 inputs, 4 hidden neurons, 1 output
 
     print("Untrained Network Predictions:")
     print("Input1  Input2  Prediction  Target  Error")
@@ -1123,7 +1150,9 @@ def main():
         prediction = xor_network.forward(inputs)
         error = abs(prediction[0] - targets[0])
         total_error += error
-        print(f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {prediction[0]:8.4f}  {targets[0]:4.1f}  {error:6.4f}")
+        print(
+            f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {prediction[0]:8.4f}  {targets[0]:4.1f}  {error:6.4f}"
+        )
 
     avg_error = total_error / len(xor_dataset)
     print(f"Average prediction error (untrained): {avg_error:.4f}")
@@ -1161,12 +1190,12 @@ def main():
     # Create network for XOR training
     print("\nInitializing network for XOR training:")
     print("Architecture: 2 inputs -> 4 hidden neurons -> 1 output")
-    training_network = NeuralNetwork([2, 4, 1], 'sigmoid')
+    training_network = NeuralNetwork([2, 4, 1], "sigmoid")
 
     # Training parameters
     epochs = 1000
     learning_rate = 5.0  # Higher learning rate for faster convergence on simple XOR
-    loss_function = 'mse'
+    loss_function = "mse"
 
     print("Training parameters:")
     print(f"  Epochs: {epochs}")
@@ -1184,7 +1213,7 @@ def main():
         epochs=epochs,
         learning_rate=learning_rate,
         loss_function=loss_function,
-        verbose=True
+        verbose=True,
     )
 
     print("-" * 50)
@@ -1200,7 +1229,9 @@ def main():
         prediction = training_network.forward(inputs)
         error = abs(prediction[0] - targets[0])
         total_error_trained += error
-        print(f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {prediction[0]:8.4f}  {targets[0]:4.1f}  {error:6.4f}")
+        print(
+            f"{inputs[0]:4.1f}    {inputs[1]:4.1f}    {prediction[0]:8.4f}  {targets[0]:4.1f}  {error:6.4f}"
+        )
 
     avg_error_trained = total_error_trained / len(xor_dataset)
     print(f"Average prediction error (trained): {avg_error_trained:.6f}")
@@ -1225,11 +1256,13 @@ def main():
         correct = abs(predicted_class - target_class) < tolerance
         correct_predictions += int(correct)
 
-        print(f"Input: ({inputs[0]}, {inputs[1]}) -> "
-              f"Raw: {prediction[0]:.4f}, "
-              f"Class: {predicted_class}, "
-              f"Target: {target_class}, "
-              f"{'✓' if correct else '✗'}")
+        print(
+            f"Input: ({inputs[0]}, {inputs[1]}) -> "
+            f"Raw: {prediction[0]:.4f}, "
+            f"Class: {predicted_class}, "
+            f"Target: {target_class}, "
+            f"{'✓' if correct else '✗'}"
+        )
 
     accuracy = correct_predictions / len(xor_dataset)
     print(f"\nClassification Accuracy: {accuracy:.1%} ({correct_predictions}/{len(xor_dataset)})")
