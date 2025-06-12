@@ -83,6 +83,68 @@ def plot_function(
     print(f"Plot saved to: {output_file}")
 
 
+def plot_function_with_optimization_path(
+    param_history: List[float],
+    function_history: List[float],
+    x_range: Tuple[float, float] = (-2, 8),
+    num_points: int = 1000,
+    output_file: str = "gradient_descent_with_path.png"
+) -> None:
+    """
+    Plot the target function with optimization path overlay.
+
+    Args:
+        param_history: List of parameter values during optimization
+        function_history: List of function values during optimization
+        x_range: Tuple of (min_x, max_x) for plotting range
+        num_points: Number of points to use for smooth curve
+        output_file: Filename to save the plot to
+    """
+    # Create function curve
+    x_vals = torch.linspace(x_range[0], x_range[1], num_points)
+    y_vals = target_function(x_vals)
+
+    plt.figure(figsize=(12, 8))
+
+    # Plot function curve
+    plt.plot(x_vals.numpy(), y_vals.numpy(), 'b-', linewidth=2, label='f(x) = (x-3)² + 1')
+
+    # Plot optimization path
+    plt.plot(param_history, function_history, 'ro-', markersize=4, linewidth=1.5,
+             alpha=0.8, label='Optimization Path')
+
+    # Highlight start and end points
+    plt.plot(param_history[0], function_history[0], 'go', markersize=10,
+             label=f'Start: x={param_history[0]:.2f}')
+    plt.plot(param_history[-1], function_history[-1], 'r*', markersize=12,
+             label=f'End: x={param_history[-1]:.2f}')
+
+    # Add step numbers for first few and last few steps
+    step_labels = [0, 1, 2] + list(range(max(0, len(param_history)-3), len(param_history)))
+    step_labels = sorted(set(step_labels))  # Remove duplicates and sort
+
+    for i in step_labels:
+        if i < len(param_history):
+            plt.annotate(f'{i}',
+                        (param_history[i], function_history[i]),
+                        xytext=(5, 5), textcoords='offset points',
+                        fontsize=8, alpha=0.7)
+
+    # Add reference lines for true minimum
+    plt.axvline(x=3, color='gray', linestyle='--', alpha=0.5, label='True minimum x=3')
+    plt.axhline(y=1, color='gray', linestyle='--', alpha=0.5, label='True minimum f(x)=1')
+
+    plt.xlabel('x')
+    plt.ylabel('f(x)')
+    plt.title('Gradient Descent Optimization Path\nf(x) = (x - 3)² + 1')
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Optimization path plot saved to: {output_file}")
+
+
 def gradient_descent(
     initial_x: float,
     learning_rate: float = 0.1,
@@ -240,6 +302,21 @@ def main():
     print("\nPlotting target function...")
     output_file = output_dir / "gradient_descent_function.png"
     plot_function(output_file=str(output_file))
+
+    # Demonstrate optimization path visualization
+    print("\nGenerating optimization path visualization...")
+    param_hist, func_hist = gradient_descent(
+        initial_x=0.0,
+        learning_rate=0.1,
+        num_iterations=30
+    )
+
+    # Plot function with optimization path overlay
+    path_output_file = output_dir / "gradient_descent_with_path.png"
+    plot_function_with_optimization_path(
+        param_hist, func_hist,
+        output_file=str(path_output_file)
+    )
 
 
 if __name__ == "__main__":
